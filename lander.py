@@ -14,6 +14,7 @@ import numpy as np
 import math
 import os
 from enum import Enum
+from datetime import datetime
 
 
 class RedcrabLander:
@@ -561,7 +562,7 @@ class RedcrabLander:
                     m = "T"
                 ctx.vectrex_board_text.draw_text(ctx, " & " + str(self.safe_land) +
                                                  " (" + str(self.sub_level_x) + "," + str(
-                                                self.sub_level_y) + ")" + m, 0, (234 * ctx.KH), 10)
+                    self.sub_level_y) + ")" + m, 0, (234 * ctx.KH), 10)
 
             # Life
             if self.status != RedcrabLander.GameStatus.GS_EDIT and \
@@ -1247,7 +1248,8 @@ class RedcrabLander:
                         self.ship.location.y <= self.scene.ground[
                             int(self.ship.location.x)] + self.ship.size * 0.80) and \
                             ((self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10) or
-                             (self.scene.fuel_location.x - 10 < self.ship.location.x < self.scene.fuel_location.x + 10)):
+                             (
+                                     self.scene.fuel_location.x - 10 < self.ship.location.x < self.scene.fuel_location.x + 10)):
                         if self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
@@ -1365,13 +1367,15 @@ class RedcrabLander:
                 vv = ".0.0"
             else:
                 vv = "." + str(sub_level_x) + "." + str(sub_level_y)
-            levelFilename = RedcrabLander.data_path + "l" + lvl + vv + ".lvl"
-            if os.path.exists(levelFilename):
-                fi = open(levelFilename, "wt")
-            else:
-                return 0
-            print("version=1", file=fi)
+            level_file_name = RedcrabLander.data_path + "l" + str(lvl) + vv + ".lvl"
+            if os.path.exists(level_file_name):
+                old_file_name = level_file_name + ".backup-" + datetime.now().strftime("%Y%m%d%H%M%S")
+                if os.path.exists(old_file_name):
+                    os.remove(old_file_name)
+                os.rename(level_file_name, old_file_name)
 
+            fi = open(level_file_name, "wt")
+            print("version=1", file=fi)
             for i in range(320):
                 print(self.scene.sky[i], file=fi)
                 print(self.scene.ground[i], file=fi)
@@ -1401,7 +1405,7 @@ class RedcrabLander:
             #  put fuel
             print(self.ship.fuel, file=fi)
             #  put enemies quantity of "Energy sucker"
-            print(self.number_of_sucker)
+            print(self.number_of_sucker, file=fi)
             for i in range(self.number_of_sucker):
                 print(self.sucker[i].location.x, file=fi)
                 print(self.sucker[i].location.y, file=fi)
@@ -1411,7 +1415,7 @@ class RedcrabLander:
             else:
                 print("Msg" + str(lvl), file=fi)
             fi.close()
-            print("Level file", levelFilename, "saved.")
+            print("Level file", level_file_name, "saved.")
             return 1
 
         def show_message(self, ctx):
@@ -1440,8 +1444,8 @@ class RedcrabLander:
                      " t,b,l,r ................: allow/disallow sub level top/bottom/left/right",
                      " T,B,L,R ................: move to sub level top/bottom/left/right",
                      " + / - ..................: Change Level Up/Down",
-                     " LEFT MOUSE BUTTON ......: Draw Ground (slowly please to avoid picks)",
-                     " RIGHT MOUSE BUTTON .....: Draw Sky (slowly please to avoid picks)",
+                     " LEFT MOUSE BUTTON ......: Draw Ground (slowly please to avoid spikes)",
+                     " RIGHT MOUSE BUTTON .....: Draw Sky (slowly please to avoid spikes)",
                      " ",
                      " Auto-save level when leaving Editor (F10)",
                      " Auto-load level when entering Editor (F10)",
@@ -1470,12 +1474,12 @@ class RedcrabLander:
             colour = 10
             for aline in m:
                 if not self.showing_message_editor_help:
-                    tt = int(self.tic/2)
+                    tt = int(self.tic / 2)
                     colour = 10
-                    if int(tt / lmax) == (i+1):
-                        aline = aline[:tt % lmax]
+                    if int(tt / lmax) == (i + 1):
+                        aline = aline[:tt % lmax] + "#"
                         colour = 15
-                    elif int(tt / lmax) < (i+1):
+                    elif int(tt / lmax) < (i + 1):
                         aline = ""
                 aline = " " + aline + (" " * (lmax - aline.__len__()))
                 if self.showing_message_editor_help:
@@ -1485,7 +1489,7 @@ class RedcrabLander:
                                                  ctx.G_WIDTH / 2.0, (i * 9.0 + 6.0) * ctx.KH, colour)
                 i += 1
             self.tic += 1
-            if self.tic > ctx.fps * 25 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
+            if self.tic > ctx.fps * 35 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
                 self.tic = 0
                 self.showing_message_screen = self.showing_message_editor_help = False
             return
@@ -1600,7 +1604,7 @@ class RedcrabLander:
             self.sound[1].play()
 
         def sound_play_thrust(self):
-            self.sound[2].play()
+            self.sound[2].play(fade_ms=100)
 
         def sound_play_explosion(self):
             self.sound[3].play()
@@ -1609,7 +1613,7 @@ class RedcrabLander:
             self.sound[4].play()
 
         def sound_play_title(self):
-            self.sound[5].play()
+            self.sound[5].play(fade_ms=2000)
 
         def draw_line(self, x1, y1, x2, y2, colour):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
