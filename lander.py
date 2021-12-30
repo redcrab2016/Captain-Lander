@@ -55,6 +55,7 @@ class RedcrabLander:
             self.alphabet[ord(".")] = "LL"
             self.alphabet[ord(",")] = "LD"
             self.alphabet[ord("'")] = "HP"
+            self.alphabet[ord("?")] = "OGHIAL DD"
             self.alphabet[ord("(")] = "HGED"
             self.alphabet[ord(")")] = "HICD"
             self.alphabet[ord("_")] = "EC"
@@ -367,7 +368,7 @@ class RedcrabLander:
             self.location.x = x
             self.location.y = y
 
-    class Landscape:
+    class Scene:
         def __init__(self):
             self.ground = [0.0] * 320
             self.sky = [0.0] * 320
@@ -421,7 +422,6 @@ class RedcrabLander:
             if global_level <= 0:
                 global_level = 1
             level = global_level % 10
-            # lb = 0
             ub = self.ground.__len__() - 1
             self.start_location.x = 160
             self.start_location.y = 230
@@ -463,8 +463,8 @@ class RedcrabLander:
             self.fuel_location.x = -100.0
             self.fuel_location.y = -100
             self.pad_location.x = (int(np.random.rand() * 2) * 300 - 150) * (level / 10.0) + 160
-            self.pad_location.y = (self.ground[int(self.pad_location.x) - 10] + self.ground[
-                int(self.pad_location.x) + 10]) / 2
+            self.pad_location.y = (self.ground[int(self.pad_location.x) - 10] +
+                                   self.ground[int(self.pad_location.x) + 10]) / 2
             self.pad_location.y = 20 if (self.pad_location.y < 20) else self.pad_location.y
             lb = int(self.pad_location.x) - 10
             ub = int(self.pad_location.x) + 10
@@ -485,7 +485,7 @@ class RedcrabLander:
             self.ship = RedcrabLander.Lander()
             self.sucker = tuple(RedcrabLander.EnergySucker() for _ in range(101))
             self.number_of_sucker = 0
-            self.scene = RedcrabLander.Landscape()
+            self.scene = RedcrabLander.Scene()
             self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
             self.status = RedcrabLander.GameStatus.GS_INTRO
             self.level_title = [""] * 201
@@ -620,7 +620,6 @@ class RedcrabLander:
             elif self.status == RedcrabLander.GameStatus.GS_INTRO:
                 #  INTRO
                 if self.tic2 == 1:
-                    pass
                     ctx.sound_play_title()
                 if self.tic2 <= 200:
                     ctx.vectrex_text_big.scale_rotation(1.0 * self.tic2 / 200.0 * 5.0 * ctx.KW,
@@ -1248,8 +1247,7 @@ class RedcrabLander:
                         self.ship.location.y <= self.scene.ground[
                             int(self.ship.location.x)] + self.ship.size * 0.80) and \
                             ((self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10) or
-                             (
-                                     self.scene.fuel_location.x - 10 < self.ship.location.x < self.scene.fuel_location.x + 10)):
+                             (self.scene.fuel_location.x - 10 < self.ship.location.x < self.scene.fuel_location.x + 10)):
                         if self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
@@ -1355,14 +1353,12 @@ class RedcrabLander:
                 self.sucker[i].location.x = float(fi.readline())
                 self.sucker[i].location.y = float(fi.readline())
             # get message of level
-
             if 0 <= lvl < self.level_title.__len__():
                 self.level_title[lvl] = fi.readline().rstrip('\n')
             fi.close()
             return 1
 
         def save_level(self, lvl, sub_level_x=-100, sub_level_y=-100):
-
             if sub_level_x <= -100 and sub_level_y <= -100:
                 vv = ".0.0"
             else:
@@ -1373,7 +1369,6 @@ class RedcrabLander:
                 if os.path.exists(old_file_name):
                     os.remove(old_file_name)
                 os.rename(level_file_name, old_file_name)
-
             fi = open(level_file_name, "wt")
             print("version=1", file=fi)
             for i in range(320):
@@ -1475,11 +1470,16 @@ class RedcrabLander:
             for aline in m:
                 if not self.showing_message_editor_help:
                     tt = int(self.tic / 2)
+                    limit = int(tt / lmax)
+                    previous_tt = int((self.tic - 1) / 2)
+                    previous_limit = int(previous_tt / lmax)
+                    if previous_limit != limit and limit <= m.__len__():
+                        ctx.sound_play_zing()
                     colour = 10
-                    if int(tt / lmax) == (i + 1):
+                    if limit == (i + 1):
                         aline = aline[:tt % lmax] + "#"
                         colour = 15
-                    elif int(tt / lmax) < (i + 1):
+                    elif limit < (i + 1):
                         aline = ""
                 aline = " " + aline + (" " * (lmax - aline.__len__()))
                 if self.showing_message_editor_help:
@@ -1494,13 +1494,13 @@ class RedcrabLander:
                 self.showing_message_screen = self.showing_message_editor_help = False
             return
 
-    class VectrexMemory:
-        def __init__(self):
-            self.p1 = pg.math.Vector2(0, 0)
-            self.p2 = pg.math.Vector2(0, 0)
-            self.colour = pg.Color(0, 0, 0)
-
     class GameContext:
+        class VectrexMemory:
+            def __init__(self):
+                self.p1 = pg.math.Vector2(0, 0)
+                self.p2 = pg.math.Vector2(0, 0)
+                self.colour = pg.Color(0, 0, 0)
+
         def __init__(self):
             self.data_path = "data/"
             self.action_mouse_button1 = False
@@ -1552,7 +1552,7 @@ class RedcrabLander:
             pg.display.set_caption('Redcrab Lander')
             self.number_segment_circle = 16
             self.key_text = ""
-            self.vectrex_memory = tuple(RedcrabLander.VectrexMemory() for _ in range(10000))
+            self.vectrex_memory = tuple(RedcrabLander.GameContext.VectrexMemory() for _ in range(10000))
             self.vectrex_memory_size = 0
             self.vectrex_text_1 = RedcrabLander.TinyVectrex()
             self.vectrex_board_text = RedcrabLander.TinyVectrex()
@@ -1570,7 +1570,8 @@ class RedcrabLander:
                 pg.mixer.Sound(RedcrabLander.data_path + "thrust.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_path + "explosion.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_path + "landed.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "SE-Gun-001.ogg")
+                pg.mixer.Sound(RedcrabLander.data_path + "SE-Gun-001.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_path + "tzing01.ogg"),
             )
             self.music_channel = None
             self.KW = self.G_WIDTH / 320.0
@@ -1613,7 +1614,11 @@ class RedcrabLander:
             self.sound[4].play()
 
         def sound_play_title(self):
-            self.sound[5].play(fade_ms=2000)
+            self.sound[5].play(maxtime=4000, fade_ms=2000)
+
+        def sound_play_zing(self):
+            self.sound[6].set_volume(0.04)
+            self.sound[6].play()
 
         def draw_line(self, x1, y1, x2, y2, colour):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
@@ -1664,7 +1669,7 @@ class RedcrabLander:
         def is_any_key_pressed(self):  # return True or False
             return self.action_key_any
 
-        def process_input(self):
+        def capture_input(self):
             self.key_text = ""
             self.action_quit = False
             self.last_event = None
@@ -1782,7 +1787,7 @@ class RedcrabLander:
     def play(self):
         self.run = True
         while self.run or self.game.showing_message_screen:
-            self.game_context.process_input()
+            self.game_context.capture_input()
             if self.game.showing_message_screen:
                 self.game.show_message(self.game_context)
             else:
