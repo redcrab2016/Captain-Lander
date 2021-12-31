@@ -1241,13 +1241,14 @@ class RedcrabLander:
                         self.ship.speed.y = -self.ship.speed.y / 2.0
                 if self.ship.location.y <= self.scene.ground[int(self.ship.location.x)] + self.ship.size * 0.80 or \
                         self.ship.location.y >= self.scene.sky[int(self.ship.location.x)] - self.ship.size * 0.80:
-                    speed = int(self.ship.speed.x ** 2 + self.ship.speed.y ** 2) * 1000
+                    speed = int((self.ship.speed.x ** 2 + self.ship.speed.y ** 2) * 1000)
                     angle = int(abs(self.ship.angle / (np.pi / 180)))
                     if (speed <= 60 and angle < 10 and
-                        self.ship.location.y <= self.scene.ground[
-                            int(self.ship.location.x)] + self.ship.size * 0.80) and \
+                        self.ship.location.y <= self.scene.ground[int(self.ship.location.x)] +
+                        self.ship.size * 0.80) and \
                             ((self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10) or
-                             (self.scene.fuel_location.x - 10 < self.ship.location.x < self.scene.fuel_location.x + 10)):
+                             (self.scene.fuel_location.x - 10 <
+                              self.ship.location.x < self.scene.fuel_location.x + 10)):
                         if self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
