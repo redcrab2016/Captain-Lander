@@ -980,7 +980,7 @@ class RedcrabLander:
                     if ctx.action_key_left_arrow:
                         tg = self.scene.ground[self.scene.ground.__len__() - 1]
                         ts = self.scene.sky[self.scene.sky.__len__() - 1]
-                        for i in range(self.scene.ground.__len__(), 0, -1):
+                        for i in range(self.scene.ground.__len__() - 1, 0, -1):
                             self.scene.ground[i] = self.scene.ground[i - 1]
                             self.scene.sky[i] = self.scene.sky[i - 1]
                         self.scene.ground[0] = tg
@@ -1003,7 +1003,7 @@ class RedcrabLander:
                     if ctx.action_key_rightarrow:
                         tg = self.scene.ground[0]
                         ts = self.scene.sky[0]
-                        for i in range(self.scene.ground.__len__()):
+                        for i in range(self.scene.ground.__len__() - 1):
                             self.scene.ground[i] = self.scene.ground[i + 1]
                             self.scene.sky[i] = self.scene.sky[i + 1]
                         self.scene.ground[self.scene.ground.__len__() - 1] = tg
