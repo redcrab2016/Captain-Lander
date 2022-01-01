@@ -206,12 +206,42 @@ class RedcrabLander:
 
         def draw_text(self, ctx, s, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
-            c = float(s.__len__() * self.cx)
+            c, _ = self.draw_text_length(s)
+            c = float(c * self.cx)
+            default_colour = colour
             dx = self.size * math.cos(text_angle) * 1.80
             dy = self.size * math.sin(text_angle) * 1.80
-            for i in range(s.__len__()):
-                a = ord(s[i])
-                self.draw_script(ctx, self.alphabet[a], (xc + dx * (i - c)), (yc + dy * (i - c)), colour)
+            j = 0
+            read_colour = False
+            for letter in s:
+                if letter == "@":
+                    read_colour = True
+                elif read_colour:
+                    a = ord(letter)
+                    if 48 <= a <= 57:
+                        colour = a - 48
+                    elif 65 <= a <= 70:
+                        colour = a - 55
+                    else:
+                        colour = default_colour
+                    read_colour = False
+                else:
+                    a = ord(letter)
+                    self.draw_script(ctx, self.alphabet[a], (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
+                    j += 1
+
+        def draw_text_length(self, s):
+            number_character = 0
+            if s is None:
+                return 0, 0
+            it = iter(s)
+            for c in it:
+                if c == "@":
+                    c = next(it)
+                    number_character += 1
+                else:
+                    number_character += 1
+            return number_character, self.size * 1.8 * number_character
 
     class GameStatus(Enum):
         GS_START = 0
@@ -593,7 +623,10 @@ class RedcrabLander:
             ctx.vectrex_board_text.scale_rotation(ctx.vectrex_board_text.size, self.tic * np.pi / 180)
             ctx.vectrex_board_text.draw_text(ctx, " ~", (150 * ctx.KW), (235 * ctx.KH), 14, 0)
             ctx.vectrex_board_text.scale_rotation(ctx.vectrex_board_text.size, 0)
-            ctx.draw_box_full(161 * ctx.KW, 231 * ctx.KH, (161 + self.ship.fuel) * ctx.KW, 239 * ctx.KH, 14)
+            colour = 10
+            colour = 14 if (self.ship.fuel < 50) else colour
+            colour = 12 if (self.ship.fuel < 25) else colour
+            ctx.draw_box_full(161 * ctx.KW, 231 * ctx.KH, (161 + self.ship.fuel) * ctx.KW, 239 * ctx.KH, colour)
             ctx.draw_box(161 * ctx.KW, 231 * ctx.KH, 261 * ctx.KW, 239 * ctx.KH, 15)
 
             # Speed
@@ -601,7 +634,10 @@ class RedcrabLander:
                 speed = int((self.ship.speed.x ** 2 + self.ship.speed.y ** 2) * 1000)
                 speed = 100 if (int(abs(self.ship.angle / (np.pi / 180))) >= 10) else speed
                 speed = 100 if (speed > 100) else speed
-                ctx.draw_box_full(265 * ctx.KW, 231 * ctx.KH, (265 + speed / 2) * ctx.KW, 239 * ctx.KH, 14)
+                colour = 10
+                colour = 14 if (speed > 30) else colour
+                colour = 12 if (speed > 60) else colour
+                ctx.draw_box_full(265 * ctx.KW, 231 * ctx.KH, (265 + speed / 2) * ctx.KW, 239 * ctx.KH, colour)
             ctx.draw_box(265 * ctx.KW, 231 * ctx.KH, (265 + 60 / 2) * ctx.KW, 239 * ctx.KH, 15)
             ctx.draw_box(265 * ctx.KW, 231 * ctx.KH, (265 + 50) * ctx.KW, 239 * ctx.KH, 15)
 
@@ -1416,40 +1452,40 @@ class RedcrabLander:
 
         def show_message(self, ctx):
             if self.showing_message_editor_help and self.showing_message_screen:
-                m = ("EDITOR COMMAND",
-                     "--------------",
-                     " F1 .....................: This help",
-                     " F2 .....................: Save current Level",
-                     " F3 .....................: Load current Level",
-                     " F4 .....................: Generate a landscape (current level)",
-                     " F5 .....................: Allow/disallow launch after landing (end level anim)",
-                     " F6 .....................: Remove land pad",
-                     " F7 .....................: Remove fuel pad",
-                     " F10 ....................: Enter / Leave Level Editor",
-                     " INSERT .................: Add an Energy Sucker at mouse position",
-                     " DELETE .................: Remove Last Added Energy Sucker",
-                     " HOME/END ...............: + / - Gravity",
-                     " PGUP/DOWN ..............: + / - Energy",
-                     " SPACE ..................: Place Land Pad at mouse position",
-                     " SHIFT + SPACE ..........: Place Energy Reload Pad at mouse position",
-                     " BACK-SPC ...............: Enter Title Edit Mode",
-                     " ENTER ..................: Valid Title(Edit Mode)",
-                     " LEFT/RIGHT/UP/DOWN .....: Move Lander",
-                     " LEFT Sft+LEFT/RIGHT ....: Rotate Lander",
-                     " CTRL+UP/DOWN/LEFT/RIGHT : Shift landscape ",
-                     " t,b,l,r ................: allow/disallow sub level top/bottom/left/right",
-                     " T,B,L,R ................: move to sub level top/bottom/left/right",
-                     " + / - ..................: Change Level Up/Down",
-                     " LEFT MOUSE BUTTON ......: Draw Ground (slowly please to avoid spikes)",
-                     " RIGHT MOUSE BUTTON .....: Draw Sky (slowly please to avoid spikes)",
+                m = ("@CEDITOR COMMAND",
+                     "@C--------------",
+                     " F1 @8.....................:@F This help",
+                     " F2 @8.....................:@F Save current Level",
+                     " F3 @8.....................:@F Load current Level",
+                     " F4 @8.....................:@F Generate a landscape (current level)",
+                     " F5 @8.....................:@F Allow/disallow launch after landing (end level anim)",
+                     " F6 @8.....................:@F Remove land pad",
+                     " F7 @8.....................:@F Remove fuel pad",
+                     " F10 @8....................:@F Enter / Leave Level Editor",
+                     " INSERT @8.................:@F Add an Energy Sucker at mouse position",
+                     " DELETE @8.................:@F Remove Last Added Energy Sucker",
+                     " HOME/END @8...............:@F + / - Gravity",
+                     " PGUP/DOWN @8..............:@F + / - Energy",
+                     " SPACE @8..................:@F Place Land Pad at mouse position",
+                     " SHIFT + SPACE @8..........:@F Place Energy Reload Pad at mouse position",
+                     " BACK-SPC @8...............:@F Enter Title Edit Mode",
+                     " ENTER @8..................:@F Valid Title(Edit Mode)",
+                     " LEFT/RIGHT/UP/DOWN @8.....:@F Move Lander",
+                     " LEFT Sft+LEFT/RIGHT @8....:@F Rotate Lander",
+                     " CTRL+UP/DOWN/LEFT/RIGHT@8 :@F Shift landscape ",
+                     " t,b,l,r @8................:@F allow/disallow sub level top/bottom/left/right",
+                     " T,B,L,R @8................:@F move to sub level top/bottom/left/right",
+                     " + / - @8..................:@F Change Level Up/Down",
+                     " LEFT MOUSE BUTTON @8......:@F Draw Ground (slowly please to avoid spikes)",
+                     " RIGHT MOUSE BUTTON @8.....:@F Draw Sky (slowly please to avoid spikes)",
                      " ",
-                     " Auto-save level when leaving Editor (F10)",
-                     " Auto-load level when entering Editor (F10)",
+                     " @FAuto-save level when leaving Editor @$F10",
+                     " @FAuto-load level when entering Editor @$F10",
                      " ",
-                     " TIP : You may use Landscape generator (F4) and use the land pad command",
+                     " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
                      "  (keep space key down) and move mouse to have a quick landscape design",
                      "",
-                     "Press Any Key to continue")
+                     "@8Press Any Key to continue")
             else:
                 messageFilename = RedcrabLander.data_path + "m" + str(self.safe_land) + ".lvl"
                 if os.path.exists(messageFilename):
@@ -1462,8 +1498,9 @@ class RedcrabLander:
                     return
             lmax = 0
             for aline in m:
-                lmax = aline.__len__() if aline.__len__() > lmax else lmax
-            lmax += 1
+                number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
+                lmax = number_character if number_character > lmax else lmax
+            lmax += 2
             ctx.clear_all_drawing()
             ctx.vectrex_text_1.scale_rotation(4.0 * ctx.KW, 0)
             i = 0
@@ -1482,7 +1519,8 @@ class RedcrabLander:
                         colour = 15
                     elif limit < (i + 1):
                         aline = ""
-                aline = " " + aline + (" " * (lmax - aline.__len__()))
+                number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
+                aline = " " + aline + (" " * (lmax - number_character))
                 if self.showing_message_editor_help:
                     ctx.vectrex_text_small.draw_text(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
