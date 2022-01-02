@@ -964,14 +964,11 @@ class RedcrabLander:
             # if (UNITY_EDITOR)
             if self.status == RedcrabLander.GameStatus.GS_EDIT or \
                     self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:
-                xxm = ctx.action_mouse_position_x
-                yym = ctx.action_mouse_position_y
-                mouse_buttons = 1 if ctx.action_mouse_button1 else 0
-                mouse_buttons += 2 if ctx.action_mouse_button2 else 0
-                mouse_buttons += 4 if ctx.action_mouse_button3 else 0
-                self.bm = mouse_buttons
-                self.xm = xxm / ctx.KW * 1.0
-                self.ym = yym / ctx.KH * 1.0
+                self.bm = 1 if ctx.action_mouse_button1 else 0
+                self.bm += 2 if ctx.action_mouse_button3 else 0
+                self.bm += 4 if ctx.action_mouse_button2 else 0
+                self.xm = ctx.action_mouse_position_x / ctx.KW * 1.0
+                self.ym = ctx.action_mouse_position_y / ctx.KH * 1.0
                 self.scene.start_location.x = self.ship.location.x
                 self.scene.start_location.y = self.ship.location.y
 
@@ -1454,36 +1451,36 @@ class RedcrabLander:
             if self.showing_message_editor_help and self.showing_message_screen:
                 m = ("@CEDITOR COMMAND",
                      "@C--------------",
-                     " F1 @8.....................:@F This help",
-                     " F2 @8.....................:@F Save current Level",
-                     " F3 @8.....................:@F Load current Level",
-                     " F4 @8.....................:@F Generate a landscape (current level)",
-                     " F5 @8.....................:@F Allow/disallow launch after landing (end level anim)",
-                     " F6 @8.....................:@F Remove land pad",
-                     " F7 @8.....................:@F Remove fuel pad",
-                     " F10 @8....................:@F Enter / Leave Level Editor",
-                     " INSERT @8.................:@F Add an Energy Sucker at mouse position",
-                     " DELETE @8.................:@F Remove Last Added Energy Sucker",
-                     " HOME/END @8...............:@F + / - Gravity",
-                     " PGUP/DOWN @8..............:@F + / - Energy",
-                     " SPACE @8..................:@F Place Land Pad at mouse position",
-                     " SHIFT + SPACE @8..........:@F Place Energy Reload Pad at mouse position",
-                     " BACK-SPC @8...............:@F Enter Title Edit Mode",
-                     " ENTER @8..................:@F Valid Title(Edit Mode)",
-                     " LEFT/RIGHT/UP/DOWN @8.....:@F Move Lander",
-                     " LEFT Sft+LEFT/RIGHT @8....:@F Rotate Lander",
-                     " CTRL+UP/DOWN/LEFT/RIGHT@8 :@F Shift landscape ",
-                     " t,b,l,r @8................:@F allow/disallow sub level top/bottom/left/right",
-                     " T,B,L,R @8................:@F move to sub level top/bottom/left/right",
-                     " + / - @8..................:@F Change Level Up/Down",
-                     " LEFT MOUSE BUTTON @8......:@F Draw Ground (slowly please to avoid spikes)",
-                     " RIGHT MOUSE BUTTON @8.....:@F Draw Sky (slowly please to avoid spikes)",
+                     " F1 @8......................@F This help",
+                     " F2 @8......................@F Save current Level",
+                     " F3 @8......................@F Load current Level",
+                     " F4 @8......................@F Generate a landscape (current level)",
+                     " F5 @8......................@F Allow/disallow launch after landing (end level anim)",
+                     " F6 @8......................@F Remove land pad",
+                     " F7 @8......................@F Remove fuel pad",
+                     " F10 @8.....................@F Enter / Leave Level Editor",
+                     " INSERT @8..................@F Add an Energy Sucker at mouse position",
+                     " DELETE @8..................@F Remove Last Added Energy Sucker",
+                     " HOME/END @8................@F + / - Gravity",
+                     " PGUP/DOWN @8...............@F + / - Energy",
+                     " SPACE @8...................@F Place Land Pad at mouse position",
+                     " SHIFT + SPACE @8...........@F Place Energy Reload Pad at mouse position",
+                     " BACK-SPC @8................@F Enter Title Edit Mode",
+                     " ENTER @8...................@F Valid Title(Edit Mode)",
+                     " LEFT/RIGHT/UP/DOWN @8......@F Move Lander",
+                     " LEFT Sft+LEFT/RIGHT @8.....@F Rotate Lander",
+                     " CTRL+UP/DOWN/LEFT/RIGHT@8 .@F Shift landscape ",
+                     " t,b,l,r @8.................@F allow/disallow sub level top/bottom/left/right",
+                     " T,B,L,R @8.................@F move to sub level top/bottom/left/right",
+                     " + / - @8...................@F Change Level Up/Down",
+                     " LEFT MOUSE BUTTON @8.......@F Draw Ground (slowly please to avoid spikes)",
+                     " RIGHT MOUSE BUTTON @8......@F Draw Sky (slowly please to avoid spikes)",
                      " ",
                      " @FAuto-save level when leaving Editor @$F10",
                      " @FAuto-load level when entering Editor @$F10",
                      " ",
                      " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
-                     "  (keep space key down) and move mouse to have a quick landscape design",
+                     " @E (keep space key down) and move mouse to have a quick landscape design",
                      "",
                      "@8Press Any Key to continue")
             else:
@@ -1568,7 +1565,7 @@ class RedcrabLander:
             self.action_key_up_arrow = False
             self.action_key_rightarrow = False
             self.action_key_left_arrow = False
-            self.action_key_shit = False
+            self.action_key_shift = False
             self.action_key_right_shit = False
             self.action_key_lshift = False
             self.action_key_ctrl = False
@@ -1718,12 +1715,12 @@ class RedcrabLander:
                     self.action_quit = True
                 if self.last_event.type == KEYDOWN or self.last_event.type == KEYUP:
                     self.action_key_any = self.last_event.type == KEYDOWN
-                    self.action_key_left_ctrl = (self.last_event.mod | KMOD_LCTRL) != 0
-                    self.action_key_right_ctrl = (self.last_event.mod | KMOD_RCTRL) != 0
-                    self.action_key_ctrl = (self.last_event.mod | KMOD_CTRL) != 0
-                    self.action_key_lshift = (self.last_event.mod | KMOD_LSHIFT) != 0
-                    self.action_key_right_shit = (self.last_event.mod | KMOD_RSHIFT) != 0
-                    self.action_key_shit = (self.last_event.mod | KMOD_SHIFT) != 0
+                    self.action_key_left_ctrl = (self.last_event.mod & KMOD_LCTRL) != 0
+                    self.action_key_right_ctrl = (self.last_event.mod & KMOD_RCTRL) != 0
+                    self.action_key_ctrl = (self.last_event.mod & KMOD_CTRL) != 0
+                    self.action_key_lshift = (self.last_event.mod & KMOD_LSHIFT) != 0
+                    self.action_key_right_shit = (self.last_event.mod & KMOD_RSHIFT) != 0
+                    self.action_key_shift = (self.last_event.mod & KMOD_SHIFT) != 0
                     if self.last_event.key == K_LEFT:
                         self.action_rotate_left = self.last_event.type == KEYDOWN
                         self.action_key_left_arrow = self.action_rotate_left
