@@ -1326,6 +1326,7 @@ class RedcrabLander:
                         print(n)
                 self.safe_land = 99
                 self.tic = 0
+                self.tic2 = 0
                 self.showing_message_screen = True
                 return False
             return True
@@ -1486,11 +1487,19 @@ class RedcrabLander:
             else:
                 messageFilename = RedcrabLander.data_path + "m" + str(self.safe_land) + ".lvl"
                 if os.path.exists(messageFilename):
+                    if self.tic2 < 100:
+                        ctx.clear_all_drawing()
+                        if int(self.tic2 / 15) % 2 == 0:
+                            ctx.vectrex_text_big.draw_text(ctx, "incoming transmission",
+                                                           ctx.G_WIDTH / 2.0, ctx.G_HEIGHT / 2, 12)
+                        self.tic2 += 1
+                        return
                     fi = open(messageFilename)
                     m = fi.readlines()
                     fi.close()
                 else:
                     self.tic = 0
+                    self.tic2 = 0
                     self.showing_message_screen = self.showing_message_editor_help = False
                     return
             lmax = 0
@@ -1512,8 +1521,11 @@ class RedcrabLander:
                         ctx.sound_play_zing()
                     colour = 10
                     if limit == (i + 1):
-                        aline = aline[:tt % lmax] + "#"
-                        colour = 15
+                        if aline[:tt % lmax].__len__() != \
+                                aline[:(previous_tt if previous_tt >= 0 else 0) % lmax].__len__():
+                            ctx.sound_play_zing()
+                        aline = aline[:tt % lmax] + ("@F" if int(self.tic/10) % 2 == 0 else "@0") + "#"
+                        colour = 10
                     elif limit < (i + 1):
                         aline = ""
                 number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
@@ -1522,11 +1534,13 @@ class RedcrabLander:
                     ctx.vectrex_text_small.draw_text(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
                     ctx.vectrex_text_1.draw_text(ctx, aline.rstrip('\n'),
-                                                 ctx.G_WIDTH / 2.0, (i * 9.0 + 6.0) * ctx.KH, colour)
+                                                 ctx.G_WIDTH / 2.0,
+                                                 ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
+                                                  + 6.0) * ctx.KH, colour)
                 i += 1
             self.tic += 1
             if self.tic > ctx.fps * 35 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
-                self.tic = 0
+                self.tic = self.tic2 = 0
                 self.showing_message_screen = self.showing_message_editor_help = False
             return
 
@@ -1653,8 +1667,8 @@ class RedcrabLander:
             self.sound[5].play(maxtime=4000, fade_ms=2000)
 
         def sound_play_zing(self):
-            self.sound[6].set_volume(0.04)
-            self.sound[6].play()
+            self.sound[6].set_volume(0.1)
+            self.sound[6].play(maxtime=30)
 
         def draw_line(self, x1, y1, x2, y2, colour):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
