@@ -30,6 +30,10 @@ class RedcrabLander:
             self.x = 0.0
             self.y = 0.0
 
+    class TV_Alpha:
+        def __init__(self):
+            self.alpha = ""
+
     class TinyVectrex:
         def __init__(self):
             self.plot = tuple(RedcrabLander.TV_Polar2D() for _ in range(18))
@@ -37,7 +41,7 @@ class RedcrabLander:
             self.size = 0.0
             self.angle = 0.0
             self.cx = 0
-            self.alphabet = [""] * 356
+            self.alphabet = tuple(RedcrabLander.TV_Alpha() for _ in range(356))  # [""] * 356
             self.boom = 1.0
             self.set_center_text(0.5)
             j = 1
@@ -48,92 +52,92 @@ class RedcrabLander:
                 j += 1
             self.scale_rotation(4.0, 0.0)
             # sign
-            self.alphabet[ord("+")] = "PL NJ"
-            self.alphabet[ord("-")] = "NJ"
-            self.alphabet[ord("*")] = "OK MQ NJ"
-            self.alphabet[ord("/")] = "IE"
-            self.alphabet[ord(":")] = "PP LL"
-            self.alphabet[ord("!")] = "PA LL"
-            self.alphabet[ord(".")] = "LL"
-            self.alphabet[ord(",")] = "LD"
-            self.alphabet[ord("'")] = "HP"
-            self.alphabet[ord("?")] = "OGHIAL DD"
-            self.alphabet[ord("(")] = "HGED"
-            self.alphabet[ord(")")] = "HICD"
-            self.alphabet[ord("_")] = "EC"
-            self.alphabet[ord("~")] = "2E0D2C 2HCBDFEH"  # small ship with thrust
-            self.alphabet[ord("^")] = "2HCBDFEH"  # small ship without thrust
-            self.alphabet[ord("$")] = "HCBDFEH"  # normal-&sized ship
-            self.alphabet[ord("&")] = "2HCBDFEH 0BCDEFGHIB"  # rounded lander
-            self.alphabet[ord("#")] = "JKLMNOPQJ BJ CK DL EM FN GO HP IQ"  # sun
-            self.alphabet[ord("~")] = "GICEG BDFHB"  # star
-            self.alphabet[ord("§")] = "0H3I0B3C0D3E0F3G0H 3I0I 3C0C 3E0E 3G0G"  # Energy sucker
-            self.alphabet[ord("%")] = "BHFNECJB"  # Arrow
+            self.alphabet[ord("+")].alpha = "PL NJ"
+            self.alphabet[ord("-")].alpha = "NJ"
+            self.alphabet[ord("*")].alpha = "OK MQ NJ"
+            self.alphabet[ord("/")].alpha = "IE"
+            self.alphabet[ord(":")].alpha = "PP LL"
+            self.alphabet[ord("!")].alpha = "PA LL"
+            self.alphabet[ord(".")].alpha = "LL"
+            self.alphabet[ord(",")].alpha = "LD"
+            self.alphabet[ord("'")].alpha = "HP"
+            self.alphabet[ord("?")].alpha = "OGHIAL DD"
+            self.alphabet[ord("(")].alpha = "HGED"
+            self.alphabet[ord(")")].alpha = "HICD"
+            self.alphabet[ord("_")].alpha = "EC"
+            self.alphabet[ord("~")].alpha = "2E0D2C 2HCBDFEH"  # small ship with thrust
+            self.alphabet[ord("^")].alpha = "2HCBDFEH"  # small ship without thrust
+            self.alphabet[ord("$")].alpha = "HCBDFEH"  # normal-&sized ship
+            self.alphabet[ord("&")].alpha = "2HCBDFEH 0BCDEFGHIB"  # rounded lander
+            self.alphabet[ord("#")].alpha = "JKLMNOPQJ BJ CK DL EM FN GO HP IQ"  # sun
+            self.alphabet[ord("~")].alpha = "GICEG BDFHB"  # star
+            self.alphabet[ord("§")].alpha = "0H3I0B3C0D3E0F3G0H 3I0I 3C0C 3E0E 3G0G"  # Energy sucker
+            self.alphabet[ord("%")].alpha = "BHFNECJB"  # Arrow
             #  Digit
-            self.alphabet[ord("0")] = "EIHGEDCI"
-            self.alphabet[ord("1")] = "GHL"
-            self.alphabet[ord("2")] = "GHIEC"
-            self.alphabet[ord("3")] = "GHIACDE"
-            self.alphabet[ord("4")] = "LHNJ"
-            self.alphabet[ord("5")] = "IGNJCDE"
-            self.alphabet[ord("6")] = "IHGEDCJN"
-            self.alphabet[ord("7")] = "GIL"
-            self.alphabet[ord("8")] = "NGHICDENJ"
-            self.alphabet[ord("9")] = "JNGHICDE"
+            self.alphabet[ord("0")].alpha = "EIHGEDCI"
+            self.alphabet[ord("1")].alpha = "GHL"
+            self.alphabet[ord("2")].alpha = "GHIEC"
+            self.alphabet[ord("3")].alpha = "GHIACDE"
+            self.alphabet[ord("4")].alpha = "LHNJ"
+            self.alphabet[ord("5")].alpha = "IGNJCDE"
+            self.alphabet[ord("6")].alpha = "IHGEDCJN"
+            self.alphabet[ord("7")].alpha = "GIL"
+            self.alphabet[ord("8")].alpha = "NGHICDENJ"
+            self.alphabet[ord("9")].alpha = "JNGHICDE"
             #  Alphabet Uppercase
-            self.alphabet[ord("A")] = "ENOPQJC NJ"
-            self.alphabet[ord("B")] = "EGPQAKLE NA"
-            self.alphabet[ord("C")] = "KLMNOPQ"
-            self.alphabet[ord("D")] = "EGPQJKLE"
-            self.alphabet[ord("E")] = "IGEC NA"
-            self.alphabet[ord("F")] = "IGE NA"
-            self.alphabet[ord("G")] = "AJKLMNOPQ"
-            self.alphabet[ord("H")] = "GE IC NJ"
-            self.alphabet[ord("I")] = "PL"
-            self.alphabet[ord("J")] = "QKLM"
-            self.alphabet[ord("K")] = "GE NP NC"
-            self.alphabet[ord("L")] = "GEC"
-            self.alphabet[ord("M")] = "EGAIC"
-            self.alphabet[ord("N")] = "EGCI"
-            self.alphabet[ord("O")] = "JKLMNOPQJ"
-            self.alphabet[ord("P")] = "EGPQAN"
-            self.alphabet[ord("Q")] = "AKLMNOPQJK"
-            self.alphabet[ord("R")] = "EGPQAN AC"
-            self.alphabet[ord("S")] = "QPOKLM"
-            self.alphabet[ord("T")] = "PL GI"
-            self.alphabet[ord("U")] = "GNMLKJI"
-            self.alphabet[ord("V")] = "GLI"
-            self.alphabet[ord("W")] = "GEACI"
-            self.alphabet[ord("X")] = "GC EI"
-            self.alphabet[ord("Y")] = "GAI AL"
-            self.alphabet[ord("Z")] = "GIEC"
+            self.alphabet[ord("A")].alpha = "ENOPQJC NJ"
+            self.alphabet[ord("B")].alpha = "EGPQAKLE NA"
+            self.alphabet[ord("C")].alpha = "KLMNOPQ"
+            self.alphabet[ord("D")].alpha = "EGPQJKLE"
+            self.alphabet[ord("E")].alpha = "IGEC NA"
+            self.alphabet[ord("F")].alpha = "IGE NA"
+            self.alphabet[ord("G")].alpha = "AJKLMNOPQ"
+            self.alphabet[ord("H")].alpha = "GE IC NJ"
+            self.alphabet[ord("I")].alpha = "PL"
+            self.alphabet[ord("J")].alpha = "QKLM"
+            self.alphabet[ord("K")].alpha = "GE NP NC"
+            self.alphabet[ord("L")].alpha = "GEC"
+            self.alphabet[ord("M")].alpha = "EGAIC"
+            self.alphabet[ord("N")].alpha = "EGCI"
+            self.alphabet[ord("O")].alpha = "JKLMNOPQJ"
+            self.alphabet[ord("P")].alpha = "EGPQAN"
+            self.alphabet[ord("Q")].alpha = "AKLMNOPQJK"
+            self.alphabet[ord("R")].alpha= "EGPQAN AC"
+            self.alphabet[ord("S")].alpha = "QPOKLM"
+            self.alphabet[ord("T")].alpha = "PL GI"
+            self.alphabet[ord("U")].alpha = "GNMLKJI"
+            self.alphabet[ord("V")].alpha = "GLI"
+            self.alphabet[ord("W")].alpha = "GEACI"
+            self.alphabet[ord("X")].alpha = "GC EI"
+            self.alphabet[ord("Y")].alpha = "GAI AL"
+            self.alphabet[ord("Z")].alpha = "GIEC"
             # Alphabet lower case
-            self.alphabet[ord("a")] = "1ENOPQJC NJ"
-            self.alphabet[ord("b")] = "1EGPQAKLE NA"
-            self.alphabet[ord("c")] = "1KLMNOPQ"
-            self.alphabet[ord("d")] = "1EGPQJKLE"
-            self.alphabet[ord("e")] = "1IGEC NA"
-            self.alphabet[ord("f")] = "1IGE NA"
-            self.alphabet[ord("g")] = "1AJKLMNOPQ"
-            self.alphabet[ord("h")] = "1GE IC NJ"
-            self.alphabet[ord("i")] = "1PL"
-            self.alphabet[ord("j")] = "1QKLM"
-            self.alphabet[ord("k")] = "1GE NP NC"
-            self.alphabet[ord("l")] = "1GEC"
-            self.alphabet[ord("m")] = "1EGAIC"
-            self.alphabet[ord("n")] = "1EGCI"
-            self.alphabet[ord("o")] = "1JKLMNOPQJ"
-            self.alphabet[ord("p")] = "1EGPQAN"
-            self.alphabet[ord("q")] = "1AKLMNOPQJK"
-            self.alphabet[ord("r")] = "1EGPQAN AC"
-            self.alphabet[ord("s")] = "1QPOKLM"
-            self.alphabet[ord("t")] = "1PL GI"
-            self.alphabet[ord("u")] = "1GNMLKJI"
-            self.alphabet[ord("v")] = "1GLI"
-            self.alphabet[ord("w")] = "1GEACI"
-            self.alphabet[ord("x")] = "1GC EI"
-            self.alphabet[ord("y")] = "1GAI AL"
-            self.alphabet[ord("z")] = "1GIEC"
+            self.alphabet[ord("a")].alpha = "1ENOPQJC NJ"
+            self.alphabet[ord("b")].alpha = "1EGPQAKLE NA"
+            self.alphabet[ord("c")].alpha = "1KLMNOPQ"
+            self.alphabet[ord("d")].alpha = "1EGPQJKLE"
+            self.alphabet[ord("e")].alpha = "1IGEC NA"
+            self.alphabet[ord("f")].alpha = "1IGE NA"
+            self.alphabet[ord("g")].alpha = "1AJKLMNOPQ"
+            self.alphabet[ord("h")].alpha = "1GE IC NJ"
+            self.alphabet[ord("i")].alpha = "1PL"
+            self.alphabet[ord("j")].alpha = "1QKLM"
+            self.alphabet[ord("k")].alpha = "1GE NP NC"
+            self.alphabet[ord("l")].alpha = "1GEC"
+            self.alphabet[ord("m")].alpha = "1EGAIC"
+            self.alphabet[ord("n")].alpha = "1EGCI"
+            self.alphabet[ord("o")].alpha = "1JKLMNOPQJ"
+            self.alphabet[ord("p")].alpha = "1EGPQAN"
+            self.alphabet[ord("q")].alpha = "1AKLMNOPQJK"
+            self.alphabet[ord("r")].alpha = "1EGPQAN AC"
+            self.alphabet[ord("s")].alpha = "1QPOKLM"
+            self.alphabet[ord("t")].alpha = "1PL GI"
+            self.alphabet[ord("u")].alpha = "1GNMLKJI"
+            self.alphabet[ord("v")].alpha = "1GLI"
+            self.alphabet[ord("w")].alpha = "1GEACI"
+            self.alphabet[ord("x")].alpha = "1GC EI"
+            self.alphabet[ord("y")].alpha = "1GAI AL"
+            self.alphabet[ord("z")].alpha = "1GIEC"
 
         def set_center_text(self, cenx):
             self.cx = cenx
@@ -229,7 +233,7 @@ class RedcrabLander:
                     read_colour = False
                 else:
                     a = ord(letter)
-                    self.draw_script(ctx, self.alphabet[a], (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
+                    self.draw_script(ctx, self.alphabet[a].alpha, (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
                     j += 1
 
         def draw_text_length(self, s):
@@ -1854,7 +1858,7 @@ class RedcrabLander:
 
         def render_all_drawing(self):
             if self.slow_host:
-                self.screen.fill(pg.Color(0, 0, 0), )
+                self.screen.fill(pg.Color(0, 0, 0))
                 maxVM = self.vectrex_memory_size
                 iVM = 0
                 for vm in self.vectrex_memory:
