@@ -517,7 +517,7 @@ class RedcrabLander:
             self.score = 0
             self.showing_message_screen = True
             self.showing_message_editor_help = False
-            self.message = ("")
+            self.message = tuple()
             self.ship = RedcrabLander.Lander()
             self.sucker = tuple(RedcrabLander.EnergySucker() for _ in range(101))
             self.number_of_sucker = 0
@@ -1307,7 +1307,7 @@ class RedcrabLander:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
                             self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
-                                                   self.ship.size * 0.80
+                                self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1469,39 +1469,39 @@ class RedcrabLander:
             m = ()
             if self.showing_message_editor_help:
                 m = ("@CEDITOR COMMAND",
-                        "@C--------------",
-                        " F1 @8......................@F This help",
-                        " F2 @8......................@F Save current Level",
-                        " F3 @8......................@F Load current Level",
-                        " F4 @8......................@F Generate a landscape (current level)",
-                        " F5 @8......................@F Allow/disallow launch after landing (end level anim)",
-                        " F6 @8......................@F Remove land pad",
-                        " F7 @8......................@F Remove fuel pad",
-                        " F10 @8.....................@F Enter / Leave Level Editor",
-                        " INSERT @8..................@F Add an Energy Sucker at mouse position",
-                        " DELETE @8..................@F Remove Last Added Energy Sucker",
-                        " HOME/END @8................@F + / - Gravity",
-                        " PGUP/DOWN @8...............@F + / - Energy",
-                        " SPACE @8...................@F Place Land Pad at mouse position",
-                        " SHIFT + SPACE @8...........@F Place Energy Reload Pad at mouse position",
-                        " BACK-SPC @8................@F Enter Title Edit Mode",
-                        " ENTER @8...................@F Valid Title(Edit Mode)",
-                        " LEFT/RIGHT/UP/DOWN @8......@F Move Lander",
-                        " LEFT Sft+LEFT/RIGHT @8.....@F Rotate Lander",
-                        " CTRL+UP/DOWN/LEFT/RIGHT@8 .@F Shift landscape ",
-                        " t,b,l,r @8.................@F allow/disallow sub level top/bottom/left/right",
-                        " T,B,L,R @8.................@F move to sub level top/bottom/left/right",
-                        " + / - @8...................@F Change Level Up/Down",
-                        " LEFT MOUSE BUTTON @8.......@F Draw Ground (slowly please to avoid spikes)",
-                        " RIGHT MOUSE BUTTON @8......@F Draw Sky (slowly please to avoid spikes)",
-                        " ",
-                        " @FAuto-save level when leaving Editor @$F10",
-                        " @FAuto-load level when entering Editor @$F10",
-                        " ",
-                        " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
-                        " @E (keep space key down) and move mouse to have a quick landscape design",
-                        "",
-                        "@8Press Any Key to continue")
+                     "@C--------------",
+                     " F1 @8......................@F This help",
+                     " F2 @8......................@F Save current Level",
+                     " F3 @8......................@F Load current Level",
+                     " F4 @8......................@F Generate a landscape (current level)",
+                     " F5 @8......................@F Allow/disallow launch after landing (end level anim)",
+                     " F6 @8......................@F Remove land pad",
+                     " F7 @8......................@F Remove fuel pad",
+                     " F10 @8.....................@F Enter / Leave Level Editor",
+                     " INSERT @8..................@F Add an Energy Sucker at mouse position",
+                     " DELETE @8..................@F Remove Last Added Energy Sucker",
+                     " HOME/END @8................@F + / - Gravity",
+                     " PGUP/DOWN @8...............@F + / - Energy",
+                     " SPACE @8...................@F Place Land Pad at mouse position",
+                     " SHIFT + SPACE @8...........@F Place Energy Reload Pad at mouse position",
+                     " BACK-SPC @8................@F Enter Title Edit Mode",
+                     " ENTER @8...................@F Valid Title(Edit Mode)",
+                     " LEFT/RIGHT/UP/DOWN @8......@F Move Lander",
+                     " LEFT Sft+LEFT/RIGHT @8.....@F Rotate Lander",
+                     " CTRL+UP/DOWN/LEFT/RIGHT@8 .@F Shift landscape ",
+                     " t,b,l,r @8.................@F allow/disallow sub level top/bottom/left/right",
+                     " T,B,L,R @8.................@F move to sub level top/bottom/left/right",
+                     " + / - @8...................@F Change Level Up/Down",
+                     " LEFT MOUSE BUTTON @8.......@F Draw Ground (slowly please to avoid spikes)",
+                     " RIGHT MOUSE BUTTON @8......@F Draw Sky (slowly please to avoid spikes)",
+                     " ",
+                     " @FAuto-save level when leaving Editor @$F10",
+                     " @FAuto-load level when entering Editor @$F10",
+                     " ",
+                     " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
+                     " @E (keep space key down) and move mouse to have a quick landscape design",
+                     "",
+                     "@8Press Any Key to continue")
             else:
                 file_name = "m" + str(self.safe_land) + ".lvl"
                 messageFilename = RedcrabLander.data_path + file_name
@@ -1514,10 +1514,10 @@ class RedcrabLander:
                         zf = zipfile.ZipFile(RedcrabLander.data_archive)
                         try:
                             fi = io.TextIOWrapper(zf.open(file_name, "r"),
-                                          newline=None)
+                                                  newline=None)
                             m = fi.readlines()
                             fi.close()
-                        except KeyError as ke:
+                        except KeyError:
                             pass
             return m
 
@@ -1888,7 +1888,7 @@ class RedcrabLander:
         self.game_context = RedcrabLander.GameContext()
         self.timer = 0.0
         self.game_context.fps = 50
-        print("Captain Lander starting")
+        print("Captain Lander running")
         self.game_context.sound_play_score()
 
     def play(self):
