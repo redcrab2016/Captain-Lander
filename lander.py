@@ -202,10 +202,10 @@ class RedcrabLander:
                         yo = y
                         b = 0
                     else:
-                        if 48 <= a <= 57:
-                            if a == 48:
+                        if 48 <= a <= 57:  # from 0 to 9
+                            if a == 48:  # 0 is 1
                                 k = 1.0
-                            elif a == 49:
+                            elif a == 49: # 1 is square root of 2
                                 k = 0.70710678118654752440084436210485
                             else:
                                 k = 0.70710678118654752440084436210485 ** (a - 48)
@@ -543,6 +543,8 @@ class RedcrabLander:
             self.xm = 0.0
             self.ym = 0.0
             self.bm = 0
+            self.xrm = 0
+            self.yrm = 0
             self.init()
             self.best_safe_land = 0
             self.best_score = 0
@@ -990,6 +992,8 @@ class RedcrabLander:
                 self.bm += 4 if ctx.action_mouse_button2 else 0
                 self.xm = ctx.action_mouse_position_x / ctx.KW * 1.0
                 self.ym = ctx.action_mouse_position_y / ctx.KH * 1.0
+                self.xrm = ctx.action_mouse_rel_x / ctx.KW * 1.0
+                self.yrm = ctx.action_mouse_rel_y / ctx.KH * 1.0
                 self.scene.start_location.x = self.ship.location.x
                 self.scene.start_location.y = self.ship.location.y
 
@@ -1082,26 +1086,51 @@ class RedcrabLander:
                     self.status = RedcrabLander.GameStatus.GS_START
                     self.tic = 0
                     self.save_level(self.safe_land, self.sub_level_x, self.sub_level_y)
-                #  DRAW GROUND
-                if self.bm == 1:
+                #  DRAW GROUND (bm== 1) or SKY (bm == 2)
+                if self.bm == 1 or self.bm == 2:
                     if 0 <= int(self.xm) < 320:
-                        self.scene.landscape[int(self.xm)].ground = int(240 - self.ym)
-                        if self.scene.landscape[int(self.xm)].ground < 20:
-                            self.scene.landscape[int(self.xm)].ground = -20
-                        if self.scene.landscape[int(self.xm)].ground > 220:
-                            self.scene.landscape[int(self.xm)].ground = 220
-                        if self.scene.landscape[int(self.xm)].ground > self.scene.landscape[int(self.xm)].sky:
-                            self.scene.landscape[int(self.xm)].sky = self.scene.landscape[int(self.xm)].ground
-                #  DRAW SKY
-                if self.bm == 2:
-                    if 0 <= int(self.xm) < 320:
-                        self.scene.landscape[int(self.xm)].sky = int(240 - self.ym)
-                        if self.scene.landscape[int(self.xm)].sky < 20:
-                            self.scene.landscape[int(self.xm)].sky = 20
-                        if self.scene.landscape[int(self.xm)].sky > 220:
-                            self.scene.landscape[int(self.xm)].sky = 250
-                        if self.scene.landscape[int(self.xm)].ground > self.scene.landscape[int(self.xm)].sky:
-                            self.scene.landscape[int(self.xm)].ground = self.scene.landscape[int(self.xm)].sky
+                        if ctx.action_mouse_drag:
+                            if self.xrm > 0:
+                                x_start = int(self.xm - self.xrm)
+                                x_end = int(self.xm)
+                                y_start = self.ym - self.yrm
+                                y_delta = self.yrm / self.xrm
+                            elif self.xrm < 0:
+                                x_end = int(self.xm - self.xrm)
+                                x_start = int(self.xm)
+                                y_start = self.ym
+                                y_delta = self.yrm / self.xrm
+                            else:
+                                x_start = int(self.xm)
+                                x_end = int(self.xm)
+                                y_start = self.ym
+                                y_delta = 0
+                        else:
+                            x_start = int(self.xm)
+                            x_end = int(self.xm)
+                            y_start = self.ym
+                            y_delta = 0
+
+                        for x_slice in range(x_start, x_end + 1):
+                            if 0 <= x_slice < 320:
+
+                                if self.bm == 1:
+                                    self.scene.landscape[x_slice].ground = int(240 - y_start)
+                                    if self.scene.landscape[x_slice].ground < 20:
+                                        self.scene.landscape[x_slice].ground = -20
+                                    if self.scene.landscape[x_slice].ground > 220:
+                                        self.scene.landscape[x_slice].ground = 220
+                                    if self.scene.landscape[x_slice].ground > self.scene.landscape[x_slice].sky:
+                                        self.scene.landscape[x_slice].sky = self.scene.landscape[x_slice].ground
+                                else:  # bm == 2
+                                    self.scene.landscape[x_slice].sky = int(240 - y_start)
+                                    if self.scene.landscape[x_slice].sky < 20:
+                                        self.scene.landscape[x_slice].sky = 20
+                                    if self.scene.landscape[x_slice].sky > 220:
+                                        self.scene.landscape[x_slice].sky = 250
+                                    if self.scene.landscape[x_slice].ground > self.scene.landscape[x_slice].sky:
+                                        self.scene.landscape[x_slice].ground = self.scene.landscape[x_slice].sky
+                            y_start += y_delta
                 if self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:  # change text
                     if st != "":
                         isBackSpace = ctx.action_key_backspace
@@ -1322,7 +1351,7 @@ class RedcrabLander:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
                             self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
-                                                   self.ship.size * 0.80
+                                self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1513,9 +1542,6 @@ class RedcrabLander:
                      " @FAuto-save level when leaving Editor @$F10",
                      " @FAuto-load level when entering Editor @$F10",
                      " ",
-                     " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
-                     " @E (keep space key down) and move mouse to have a quick landscape design",
-                     "",
                      "@8Press Any Key to continue")
             else:
                 file_name = "m" + str(self.safe_land) + ".lvl"
@@ -1613,8 +1639,11 @@ class RedcrabLander:
             self.action_mouse_button1 = False
             self.action_mouse_button2 = False
             self.action_mouse_button3 = False
+            self.action_mouse_drag = True
             self.action_mouse_position_y = 0
             self.action_mouse_position_x = 0
+            self.action_mouse_rel_y = 0
+            self.action_mouse_rel_x = 0
             self.action_key_f1 = False
             self.action_key_f2 = False
             self.action_key_f3 = False
@@ -1849,10 +1878,17 @@ class RedcrabLander:
                     self.action_mouse_position_x = self.last_event.pos[0]
                     self.action_mouse_position_y = self.last_event.pos[1]
                     if self.last_event.type == MOUSEMOTION:
+                        self.action_mouse_rel_x = self.last_event.rel[0]
+                        self.action_mouse_rel_y = self.last_event.rel[1]
                         self.action_mouse_button1 = self.last_event.buttons[0] != 0
                         self.action_mouse_button2 = self.last_event.buttons[1] != 0
                         self.action_mouse_button3 = self.last_event.buttons[2] != 0
+                        self.action_mouse_drag = \
+                            self.action_mouse_button1 or \
+                            self.action_mouse_button2 or \
+                            self.action_mouse_button3
                     elif self.last_event.type == MOUSEBUTTONDOWN:
+                        self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = True
                         elif self.last_event.button == 2:
@@ -1860,6 +1896,7 @@ class RedcrabLander:
                         elif self.last_event.button == 3:
                             self.action_mouse_button3 = True
                     elif self.last_event.type == MOUSEBUTTONUP:
+                        self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = False
                         elif self.last_event.button == 2:
