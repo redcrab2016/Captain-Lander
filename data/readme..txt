@@ -1,0 +1,1 @@
+This data folder is the folder that contains data for level editor
