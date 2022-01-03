@@ -237,7 +237,7 @@ class RedcrabLander:
             it = iter(s)
             for c in it:
                 if c == "@":
-                    c = next(it)
+                    next(it)
                     number_character += 1
                 else:
                     number_character += 1
@@ -399,9 +399,15 @@ class RedcrabLander:
             self.location.y = y
 
     class Scene:
+        class Landscape:
+            def __init__(self):
+                self.ground = 0
+                self.sky = 0
+
         def __init__(self):
-            self.ground = [0.0] * 320
-            self.sky = [0.0] * 320
+            self.landscape = tuple(RedcrabLander.Scene.Landscape() for _ in range(320))
+            # self.ground = [0.0] * 320
+            # self.sky = [0.0] * 320
             self.pad_location = RedcrabLander.Vertex2D()
             self.fuel_location = RedcrabLander.Vertex2D()
             self.gravity = 0.0
@@ -418,14 +424,14 @@ class RedcrabLander:
 
         def draw(self, ctx):
             self.tic += 1
-            ub = self.ground.__len__() - 1
-            for i in range(ub):
-                if self.ground[i] != self.sky[i] or self.ground[i + 1] != self.sky[i + 1]:
-                    if self.ground[i] >= 20 and self.ground[i + 1] >= 20:
-                        ctx.draw_line(i * ctx.KW, (240 - int(self.ground[i])) * ctx.KH, (i + 1) * ctx.KW,
-                                      (240 - int(self.ground[i + 1])) * ctx.KH, 13)
-                    ctx.draw_line(i * ctx.KW, (240 - int(self.sky[i])) * ctx.KH, (i + 1) * ctx.KW,
-                                  (240 - int(self.sky[i + 1])) * ctx.KH, 13)
+            for i in range(self.landscape.__len__() - 1):
+                if self.landscape[i].ground != self.landscape[i].sky or \
+                        self.landscape[i + 1].ground != self.landscape[i + 1].sky:
+                    if self.landscape[i].ground >= 20 and self.landscape[i + 1].ground >= 20:
+                        ctx.draw_line(i * ctx.KW, (240 - int(self.landscape[i].ground)) * ctx.KH, (i + 1) * ctx.KW,
+                                      (240 - int(self.landscape[i + 1].ground)) * ctx.KH, 13)
+                    ctx.draw_line(i * ctx.KW, (240 - int(self.landscape[i].sky)) * ctx.KH, (i + 1) * ctx.KW,
+                                  (240 - int(self.landscape[i + 1].sky)) * ctx.KH, 13)
             ctx.draw_box_full(int(self.pad_location.x - 10) * ctx.KW, (240 - int(self.pad_location.y)) * ctx.KH,
                               int(self.pad_location.x + 10) * ctx.KW, (245 - int(self.pad_location.y)) * ctx.KH, 11)
             ctx.vectrex_text_small.draw_text(ctx, "Target", ((self.pad_location.x + 1) * ctx.KW),
@@ -452,54 +458,53 @@ class RedcrabLander:
             if global_level <= 0:
                 global_level = 1
             level = global_level % 10
-            ub = self.ground.__len__() - 1
+            ub = self.landscape.__len__() - 1
             self.start_location.x = 160
             self.start_location.y = 230
             prev = np.random.rand() * 200 + 20
-            for i in range(ub + 1):
-                self.sky[i] = 250
-                self.ground[i] = prev
+            for land_slice in self.landscape:
+                land_slice.sky = 250
+                land_slice.ground = prev
             for j in range(1, 7):
                 slope = np.random.rand() * (level + 1) * 250 / j - ((level + 1) * 250 / 2 / j)
                 cnt = 0
                 for i in range(ub + 1):
-                    cur = self.ground[i] + slope * cnt
-                    self.ground[i] = cur
+                    cur = self.landscape[i].ground + slope * cnt
+                    self.landscape[i].ground = cur
                     cnt += 1
                     if cnt > 320 / 2 ** j:
                         slope = np.random.rand() * (level + 1) * 250 / j - ((level + 1) * 250 / 2 / j)
                         cnt = 0
                         if i < ub:
-                            delta = cur - self.ground[i + 1]
+                            delta = cur - self.landscape[i + 1].ground
                         else:
                             delta = 0
                         for k in range(i + 1, ub + 1):
-                            self.ground[k] += delta
+                            self.landscape[k].ground += delta
             delta = 0
             mini = 1000
             maxi = 0
-            for i in range(ub + 1):
-                mini = self.ground[i] if (self.ground[i] < mini) else mini
-                maxi = self.ground[i] if (self.ground[i] > maxi) else maxi
-                delta += self.ground[i]
+            for land_slice in self.landscape:
+                mini = land_slice.ground if (land_slice.ground < mini) else mini
+                maxi = land_slice.ground if (land_slice.ground > maxi) else maxi
+                delta += land_slice.ground
             ground = (maxi - mini) / 5 * (1 if level == 0 else level)
             mini = maxi - ground
-            for i in range(ub + 1):
-                self.ground[i] = mini if (self.ground[i] < mini) else self.ground[i]
-                self.ground[i] = (self.ground[i] - mini) / (maxi - mini) * (level / 8.0) * 200 + 20
-            for i in range(ub + 1):
-                self.ground[i] = float(np.clip(self.ground[i], 20.0, 220.0))
+            for land_slice in self.landscape:
+                land_slice.ground = mini if (land_slice.ground < mini) else land_slice.ground
+                land_slice.ground = (land_slice.ground - mini) / (maxi - mini) * (level / 8.0) * 200 + 20
+                land_slice.ground = float(np.clip(land_slice.ground, 20.0, 220.0))
 
             self.fuel_location.x = -100.0
             self.fuel_location.y = -100
             self.pad_location.x = (int(np.random.rand() * 2) * 300 - 150) * (level / 10.0) + 160
-            self.pad_location.y = (self.ground[int(self.pad_location.x) - 10] +
-                                   self.ground[int(self.pad_location.x) + 10]) / 2
+            self.pad_location.y = (self.landscape[int(self.pad_location.x) - 10].ground +
+                                   self.landscape[int(self.pad_location.x) + 10].ground) / 2
             self.pad_location.y = 20 if (self.pad_location.y < 20) else self.pad_location.y
             lb = int(self.pad_location.x) - 10
             ub = int(self.pad_location.x) + 10
             for i in range(lb, ub + 1):
-                self.ground[i] = self.pad_location.y
+                self.landscape[i].ground = self.pad_location.y
 
     class Game:
         def __init__(self):
@@ -803,8 +808,8 @@ class RedcrabLander:
                             self.sucker[i].location.x *= 2.0
                             self.sucker[i].location.x = 319 if (self.sucker[i].location.x > 319) else self.sucker[
                                 i].location.x
-                        self.sucker[i].location.y = self.scene.ground[int(self.sucker[i].location.x)] + 20 + (
-                                220 - self.scene.ground[int(self.sucker[i].location.x)]) * np.random.rand()
+                        self.sucker[i].location.y = self.scene.landscape[int(self.sucker[i].location.x)].ground + 20 + (
+                                220 - self.scene.landscape[int(self.sucker[i].location.x)].ground) * np.random.rand()
             self.ship.location.x = self.scene.start_location.x
             self.ship.location.y = self.scene.start_location.y
 
@@ -832,8 +837,8 @@ class RedcrabLander:
                         ym += self.sucker[i].speed.y
                         xm = 319 if (xm > 319) else xm
                         xm = 0 if (xm < 0) else xm
-                        new_alt = ym - self.scene.ground[int(xm)]
-                        new_sky_dist = self.scene.sky[int(xm)] - ym
+                        new_alt = ym - self.scene.landscape[int(xm)].ground
+                        new_sky_dist = self.scene.landscape[int(xm)].sky - ym
                         # ground detection
                         if (0 <= new_alt <= 10) or (0 <= new_sky_dist <= 10):
                             self.sucker[i].speed.y = 0
@@ -993,35 +998,35 @@ class RedcrabLander:
                                 self.ship.angle -= 2.0 * np.pi
                 else:
                     if ctx.action_key_up_arrow:
-                        for i in range(self.scene.ground.__len__()):
-                            self.scene.ground[i] += 1
-                            self.scene.sky[i] += 1
-                        for i in range(self.sucker.__len__()):
-                            self.sucker[i].location.y += 1
+                        for land_slice in self.scene.landscape:
+                            land_slice.ground += 1
+                            land_slice.sky += 1
+                        for sucker in self.sucker:
+                            sucker.location.y += 1
                         self.scene.pad_location.y += 1
                         self.scene.fuel_location.y += 1
                         self.ship.location.y += 1
                     if ctx.action_key_down_arrow:
-                        for i in range(self.scene.ground.__len__()):
-                            self.scene.ground[i] -= 1
-                            self.scene.sky[i] -= 1
+                        for land_slice in self.scene.landscape:
+                            land_slice.ground -= 1
+                            land_slice.sky -= 1
                         for i in range(self.sucker.__len__()):
                             self.sucker[i].location.y -= 1
                         self.scene.pad_location.y -= 1
                         self.scene.fuel_location.y -= 1
                         self.ship.location.y -= 1
                     if ctx.action_key_left_arrow:
-                        tg = self.scene.ground[self.scene.ground.__len__() - 1]
-                        ts = self.scene.sky[self.scene.sky.__len__() - 1]
-                        for i in range(self.scene.ground.__len__() - 1, 0, -1):
-                            self.scene.ground[i] = self.scene.ground[i - 1]
-                            self.scene.sky[i] = self.scene.sky[i - 1]
-                        self.scene.ground[0] = tg
-                        self.scene.sky[0] = ts
-                        for i in range(self.sucker.__len__()):
-                            self.sucker[i].location.x += 1
-                            if self.sucker[i].location.x >= 320:
-                                self.sucker[i].location.x -= 320
+                        tg = self.scene.landscape[-1].ground
+                        ts = self.scene.landscape[-1].sky
+                        for i in range(self.scene.landscape.__len__() - 1, 0, -1):
+                            self.scene.landscape[i].ground = self.scene.landscape[i - 1].ground
+                            self.scene.landscape[i].sky = self.scene.landscape[i - 1].sky
+                        self.scene.landscape[0].ground = tg
+                        self.scene.landscape[0].sky = ts
+                        for sucker in self.sucker:
+                            sucker.location.x += 1
+                            if sucker.location.x >= 320:
+                                sucker.location.x -= 320
                         if self.scene.pad_location.x > -100:
                             self.scene.pad_location.x += 1
                             if self.scene.pad_location.x >= 320:
@@ -1034,17 +1039,17 @@ class RedcrabLander:
                         if self.ship.location.x >= 320:
                             self.ship.location.x -= 320
                     if ctx.action_key_rightarrow:
-                        tg = self.scene.ground[0]
-                        ts = self.scene.sky[0]
-                        for i in range(self.scene.ground.__len__() - 1):
-                            self.scene.ground[i] = self.scene.ground[i + 1]
-                            self.scene.sky[i] = self.scene.sky[i + 1]
-                        self.scene.ground[self.scene.ground.__len__() - 1] = tg
-                        self.scene.sky[self.scene.sky.__len__() - 1] = ts
-                        for i in range(self.sucker.__len__()):
-                            self.sucker[i].location.x -= 1
-                            if self.sucker[i].location.x < 0:
-                                self.sucker[i].location.x += 320
+                        tg = self.scene.landscape[0].ground
+                        ts = self.scene.landscape[0].sky
+                        for i in range(self.scene.landscape.__len__() - 1):
+                            self.scene.landscape[i].ground = self.scene.landscape[i + 1].ground
+                            self.scene.landscape[i].sky = self.scene.landscape[i + 1].sky
+                        self.scene.landscape[-1].ground = tg
+                        self.scene.landscape[-1].sky = ts
+                        for sucker in self.sucker:
+                            sucker.location.x -= 1
+                            if sucker.location.x < 0:
+                                sucker.location.x += 320
                         if self.scene.pad_location.x > -100:
                             self.scene.pad_location.x -= 1
                             if self.scene.pad_location.x < 0:
@@ -1064,23 +1069,23 @@ class RedcrabLander:
                 #  DRAW GROUND
                 if self.bm == 1:
                     if 0 <= int(self.xm) < 320:
-                        self.scene.ground[int(self.xm)] = int(240 - self.ym)
-                        if self.scene.ground[int(self.xm)] < 20:
-                            self.scene.ground[int(self.xm)] = -20
-                        if self.scene.ground[int(self.xm)] > 220:
-                            self.scene.ground[int(self.xm)] = 220
-                        if self.scene.ground[int(self.xm)] > self.scene.sky[int(self.xm)]:
-                            self.scene.sky[int(self.xm)] = self.scene.ground[int(self.xm)]
+                        self.scene.landscape[int(self.xm)].ground = int(240 - self.ym)
+                        if self.scene.landscape[int(self.xm)].ground < 20:
+                            self.scene.landscape[int(self.xm)].ground = -20
+                        if self.scene.landscape[int(self.xm)].ground > 220:
+                            self.scene.landscape[int(self.xm)].ground = 220
+                        if self.scene.landscape[int(self.xm)].ground > self.scene.landscape[int(self.xm)].sky:
+                            self.scene.landscape[int(self.xm)].sky = self.scene.landscape[int(self.xm)].ground
                 #  DRAW SKY
                 if self.bm == 2:
                     if 0 <= int(self.xm) < 320:
-                        self.scene.sky[int(self.xm)] = int(240 - self.ym)
-                        if self.scene.sky[int(self.xm)] < 20:
-                            self.scene.sky[int(self.xm)] = 20
-                        if self.scene.sky[int(self.xm)] > 220:
-                            self.scene.sky[int(self.xm)] = 250
-                        if self.scene.ground[int(self.xm)] > self.scene.sky[int(self.xm)]:
-                            self.scene.ground[int(self.xm)] = self.scene.sky[int(self.xm)]
+                        self.scene.landscape[int(self.xm)].sky = int(240 - self.ym)
+                        if self.scene.landscape[int(self.xm)].sky < 20:
+                            self.scene.landscape[int(self.xm)].sky = 20
+                        if self.scene.landscape[int(self.xm)].sky > 220:
+                            self.scene.landscape[int(self.xm)].sky = 250
+                        if self.scene.landscape[int(self.xm)].ground > self.scene.landscape[int(self.xm)].sky:
+                            self.scene.landscape[int(self.xm)].ground = self.scene.landscape[int(self.xm)].sky
                 if self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:  # change text
                     if st != "":
                         isBackSpace = ctx.action_key_backspace
@@ -1102,14 +1107,14 @@ class RedcrabLander:
                         self.scene.pad_location.x = self.xm
                         self.scene.pad_location.y = 240 - self.ym
                         for i in range(int(self.xm - 10), int(self.xm + 11)):
-                            self.scene.ground[i] = self.scene.pad_location.y
+                            self.scene.landscape[i].ground = self.scene.pad_location.y
                     #  INSERT FUEL PAD
                     if st == " " and ctx.action_key_lshift:
                         self.xm = np.clip(self.xm, 10, 309)
                         self.scene.fuel_location.x = self.xm
                         self.scene.fuel_location.y = 240 - self.ym
                         for i in range(int(self.xm - 10), int(self.xm + 11)):
-                            self.scene.ground[i] = self.scene.fuel_location.y
+                            self.scene.landscape[i].ground = self.scene.fuel_location.y
                     #  ENABLE/DISABLE UP/DOWN/LEFT/RIGHT PASS
                     if st == "t":
                         self.scene.go_up = 1 if self.scene.go_up == 0 else 0
@@ -1272,12 +1277,14 @@ class RedcrabLander:
                     else:
                         self.ship.location.y = 239
                         self.ship.speed.y = -self.ship.speed.y / 2.0
-                if self.ship.location.y <= self.scene.ground[int(self.ship.location.x)] + self.ship.size * 0.80 or \
-                        self.ship.location.y >= self.scene.sky[int(self.ship.location.x)] - self.ship.size * 0.80:
+                if self.ship.location.y <= self.scene.landscape[int(self.ship.location.x)].ground + \
+                        self.ship.size * 0.80 or \
+                        self.ship.location.y >= self.scene.landscape[int(self.ship.location.x)].sky - \
+                        self.ship.size * 0.80:
                     speed = int((self.ship.speed.x ** 2 + self.ship.speed.y ** 2) * 1000)
                     angle = int(abs(self.ship.angle / (np.pi / 180)))
                     if (speed <= 60 and angle < 10 and
-                        self.ship.location.y <= self.scene.ground[int(self.ship.location.x)] +
+                        self.ship.location.y <= self.scene.landscape[int(self.ship.location.x)].ground +
                         self.ship.size * 0.80) and \
                             ((self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10) or
                              (self.scene.fuel_location.x - 10 <
@@ -1286,7 +1293,8 @@ class RedcrabLander:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
                             self.ship.status = RedcrabLander.LanderStatus.LS_LANDED
-                            if self.scene.sky[int(self.ship.location.x)] <= 240 or self.scene.allow_take_off == 0:
+                            if self.scene.landscape[int(self.ship.location.x)].sky <= 240 or \
+                                    self.scene.allow_take_off == 0:
                                 self.ship.status = RedcrabLander.LanderStatus.LS_LANDED_NO_SKY
                             if self.safe_land >= 23:
                                 self.status = RedcrabLander.GameStatus.GS_FINISH
@@ -1297,7 +1305,8 @@ class RedcrabLander:
                         else:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
-                            self.ship.location.y = self.scene.ground[int(self.ship.location.x)] + self.ship.size * 0.80
+                            self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
+                                self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1345,9 +1354,9 @@ class RedcrabLander:
             if vv != "version=1":
                 fi.close()
                 return 0
-            for i in range(320):
-                self.scene.sky[i] = float(fi.readline())
-                self.scene.ground[i] = float(fi.readline())
+            for land_slice in self.scene.landscape:
+                land_slice.sky = float(fi.readline())
+                land_slice.ground = float(fi.readline())
             self.scene.go_up = int(fi.readline())
             self.scene.go_down = int(fi.readline())
             self.scene.go_left = int(fi.readline())
@@ -1406,9 +1415,9 @@ class RedcrabLander:
                 os.rename(level_file_name, old_file_name)
             fi = open(level_file_name, "wt")
             print("version=1", file=fi)
-            for i in range(320):
-                print(self.scene.sky[i], file=fi)
-                print(self.scene.ground[i], file=fi)
+            for land_slice in self.scene.landscape:
+                print(land_slice.sky, file=fi)
+                print(land_slice.ground, file=fi)
             print(self.scene.go_up, file=fi)
             print(self.scene.go_down, file=fi)
             print(self.scene.go_left, file=fi)
@@ -1511,6 +1520,7 @@ class RedcrabLander:
             ctx.vectrex_text_1.scale_rotation(4.0 * ctx.KW, 0)
             i = 0
             colour = 10
+            limit = 0
             for aline in m:
                 if not self.showing_message_editor_help:
                     tt = int(self.tic / 2)
@@ -1524,7 +1534,7 @@ class RedcrabLander:
                         if aline[:tt % lmax].__len__() != \
                                 aline[:(previous_tt if previous_tt >= 0 else 0) % lmax].__len__():
                             ctx.sound_play_zing()
-                        aline = aline[:tt % lmax] + ("@F" if int(self.tic/10) % 2 == 0 else "@0") + "#"
+                        aline = aline[:tt % lmax] + ("@F" if int(self.tic / 10) % 2 == 0 else "@0") + "#"
                         colour = 10
                     elif limit < (i + 1):
                         aline = ""
@@ -1814,7 +1824,7 @@ class RedcrabLander:
 
         def render_all_drawing(self):
             if self.slow_host:
-                self.screen.fill(pg.Color(0, 0, 0),)
+                self.screen.fill(pg.Color(0, 0, 0), )
                 maxVM = self.vectrex_memory_size
                 iVM = 0
                 for vm in self.vectrex_memory:
