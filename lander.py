@@ -102,7 +102,7 @@ class RedcrabLander:
             self.alphabet[ord("O")].alpha = "JKLMNOPQJ"
             self.alphabet[ord("P")].alpha = "EGPQAN"
             self.alphabet[ord("Q")].alpha = "AKLMNOPQJK"
-            self.alphabet[ord("R")].alpha= "EGPQAN AC"
+            self.alphabet[ord("R")].alpha = "EGPQAN AC"
             self.alphabet[ord("S")].alpha = "QPOKLM"
             self.alphabet[ord("T")].alpha = "PL GI"
             self.alphabet[ord("U")].alpha = "GNMLKJI"
@@ -211,6 +211,17 @@ class RedcrabLander:
                                 k = 0.70710678118654752440084436210485 ** (a - 48)
 
         def draw_text(self, ctx, s, xc, yc, colour, text_angle=None):
+            text_angle = self.angle if (text_angle is None) else text_angle
+            c = s.__len__() * self.cx
+            dx = self.size * math.cos(text_angle) * 1.80
+            dy = self.size * math.sin(text_angle) * 1.80
+            j = 0
+            for letter in s:
+                self.draw_script(ctx, self.alphabet[ord(letter)].alpha,
+                                 (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
+                j += 1
+
+        def draw_text_rich(self, ctx, s, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
             c, _ = self.draw_text_length(s)
             c = float(c * self.cx)
@@ -1311,7 +1322,7 @@ class RedcrabLander:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
                             self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
-                                self.ship.size * 0.80
+                                                   self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1575,12 +1586,12 @@ class RedcrabLander:
                 number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
                 aline = " " + aline + (" " * (lmax - number_character))
                 if self.showing_message_editor_help:
-                    ctx.vectrex_text_small.draw_text(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
+                    ctx.vectrex_text_small.draw_text_rich(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
-                    ctx.vectrex_text_1.draw_text(ctx, aline.rstrip('\n'),
-                                                 ctx.G_WIDTH / 2.0,
-                                                 ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
-                                                  + 6.0) * ctx.KH, colour)
+                    ctx.vectrex_text_1.draw_text_rich(ctx, aline.rstrip('\n'),
+                                                      ctx.G_WIDTH / 2.0,
+                                                      ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
+                                                       + 6.0) * ctx.KH, colour)
                 i += 1
             self.tic += 1
             if self.tic > ctx.fps * 35 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
