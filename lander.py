@@ -1552,6 +1552,8 @@ class RedcrabLander:
                 self.colour = pg.Color(0, 0, 0)
 
         def __init__(self):
+            self.frames = 0
+            self.slow_host = False
             self.data_path = "data/"
             self.action_mouse_button1 = False
             self.action_mouse_button2 = False
@@ -1811,27 +1813,40 @@ class RedcrabLander:
                             self.action_mouse_button3 = False
 
         def render_all_drawing(self):
-            self.screen.fill(pg.Color(192, 192, 192), special_flags=BLEND_RGB_MULT)
-            maxVM = self.vectrex_memory_size
-            iVM = 0
-            for vm in self.vectrex_memory:
-                if iVM >= maxVM:
-                    break
-                pg.draw.aaline(self.screen, vm.colour, vm.p1, vm.p2)
-                iVM += 1
+            if self.slow_host:
+                self.screen.fill(pg.Color(0, 0, 0),)
+                maxVM = self.vectrex_memory_size
+                iVM = 0
+                for vm in self.vectrex_memory:
+                    if iVM >= maxVM:
+                        break
+                    pg.draw.line(self.screen, vm.colour, vm.p1, vm.p2)
+                    iVM += 1
+            else:
+                if 40 < self.frames < 800 and self.clock.get_fps() <= int(0.8 * self.fps):
+                    self.slow_host = True
+                    print("Slow host detected, do not execute intensive display primitive")
+                self.screen.fill(pg.Color(192, 192, 192), special_flags=BLEND_RGB_MULT)
+                maxVM = self.vectrex_memory_size
+                iVM = 0
+                for vm in self.vectrex_memory:
+                    if iVM >= maxVM:
+                        break
+                    pg.draw.aaline(self.screen, vm.colour, vm.p1, vm.p2)
+                    iVM += 1
             pg.display.update()
+            self.frames += 1
             self.clock.tick(int(self.fps))
 
     data_path = "data/"
 
     def __init__(self):
-        self.fps = 50.0
         self.run = True
         self.game = RedcrabLander.Game()
         self.game_context = RedcrabLander.GameContext()
         self.timer = 0.0
-        self.game_context.fps = self.fps
-        print("Lander  Started")
+        self.game_context.fps = 50
+        print("Captain Lander starting")
         self.game_context.sound_play_score()
 
     def play(self):
