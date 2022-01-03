@@ -15,6 +15,8 @@ import math
 import os
 from enum import Enum
 from datetime import datetime
+import zipfile
+import io
 
 
 class RedcrabLander:
@@ -406,8 +408,6 @@ class RedcrabLander:
 
         def __init__(self):
             self.landscape = tuple(RedcrabLander.Scene.Landscape() for _ in range(320))
-            # self.ground = [0.0] * 320
-            # self.sky = [0.0] * 320
             self.pad_location = RedcrabLander.Vertex2D()
             self.fuel_location = RedcrabLander.Vertex2D()
             self.gravity = 0.0
@@ -517,6 +517,7 @@ class RedcrabLander:
             self.score = 0
             self.showing_message_screen = True
             self.showing_message_editor_help = False
+            self.message = ("")
             self.ship = RedcrabLander.Lander()
             self.sucker = tuple(RedcrabLander.EnergySucker() for _ in range(101))
             self.number_of_sucker = 0
@@ -1306,7 +1307,7 @@ class RedcrabLander:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
                             self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
-                                self.ship.size * 0.80
+                                                   self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1344,11 +1345,18 @@ class RedcrabLander:
             vv = "." + str(sub_level_x) + "." + str(sub_level_y)
             if sub_level_x <= -100 and sub_level_y <= -100:
                 vv = ".0.0"
-            levelFilename = RedcrabLander.data_path + "l" + str(lvl) + vv + ".lvl"
+            level_name = "l" + str(lvl) + vv + ".lvl"
+            levelFilename = RedcrabLander.data_path + level_name
             if os.path.exists(levelFilename):
                 fi = open(levelFilename)
             else:
-                return 0
+                try:
+                    fi = io.TextIOWrapper(zipfile.ZipFile(RedcrabLander.data_archive).open(level_name, "r"),
+                                          newline=None)
+                except Exception as ex:
+                    print("Can't open level " + level_name)
+                    print("  ", ex)
+                    return 0
             # Check file structure version
             vv = fi.readline().rstrip('\n')
             if vv != "version=1":
@@ -1457,60 +1465,82 @@ class RedcrabLander:
             print("Level file", level_file_name, "saved.")
             return 1
 
-        def show_message(self, ctx):
-            if self.showing_message_editor_help and self.showing_message_screen:
+        def _get_message(self):
+            m = ()
+            if self.showing_message_editor_help:
                 m = ("@CEDITOR COMMAND",
-                     "@C--------------",
-                     " F1 @8......................@F This help",
-                     " F2 @8......................@F Save current Level",
-                     " F3 @8......................@F Load current Level",
-                     " F4 @8......................@F Generate a landscape (current level)",
-                     " F5 @8......................@F Allow/disallow launch after landing (end level anim)",
-                     " F6 @8......................@F Remove land pad",
-                     " F7 @8......................@F Remove fuel pad",
-                     " F10 @8.....................@F Enter / Leave Level Editor",
-                     " INSERT @8..................@F Add an Energy Sucker at mouse position",
-                     " DELETE @8..................@F Remove Last Added Energy Sucker",
-                     " HOME/END @8................@F + / - Gravity",
-                     " PGUP/DOWN @8...............@F + / - Energy",
-                     " SPACE @8...................@F Place Land Pad at mouse position",
-                     " SHIFT + SPACE @8...........@F Place Energy Reload Pad at mouse position",
-                     " BACK-SPC @8................@F Enter Title Edit Mode",
-                     " ENTER @8...................@F Valid Title(Edit Mode)",
-                     " LEFT/RIGHT/UP/DOWN @8......@F Move Lander",
-                     " LEFT Sft+LEFT/RIGHT @8.....@F Rotate Lander",
-                     " CTRL+UP/DOWN/LEFT/RIGHT@8 .@F Shift landscape ",
-                     " t,b,l,r @8.................@F allow/disallow sub level top/bottom/left/right",
-                     " T,B,L,R @8.................@F move to sub level top/bottom/left/right",
-                     " + / - @8...................@F Change Level Up/Down",
-                     " LEFT MOUSE BUTTON @8.......@F Draw Ground (slowly please to avoid spikes)",
-                     " RIGHT MOUSE BUTTON @8......@F Draw Sky (slowly please to avoid spikes)",
-                     " ",
-                     " @FAuto-save level when leaving Editor @$F10",
-                     " @FAuto-load level when entering Editor @$F10",
-                     " ",
-                     " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
-                     " @E (keep space key down) and move mouse to have a quick landscape design",
-                     "",
-                     "@8Press Any Key to continue")
+                        "@C--------------",
+                        " F1 @8......................@F This help",
+                        " F2 @8......................@F Save current Level",
+                        " F3 @8......................@F Load current Level",
+                        " F4 @8......................@F Generate a landscape (current level)",
+                        " F5 @8......................@F Allow/disallow launch after landing (end level anim)",
+                        " F6 @8......................@F Remove land pad",
+                        " F7 @8......................@F Remove fuel pad",
+                        " F10 @8.....................@F Enter / Leave Level Editor",
+                        " INSERT @8..................@F Add an Energy Sucker at mouse position",
+                        " DELETE @8..................@F Remove Last Added Energy Sucker",
+                        " HOME/END @8................@F + / - Gravity",
+                        " PGUP/DOWN @8...............@F + / - Energy",
+                        " SPACE @8...................@F Place Land Pad at mouse position",
+                        " SHIFT + SPACE @8...........@F Place Energy Reload Pad at mouse position",
+                        " BACK-SPC @8................@F Enter Title Edit Mode",
+                        " ENTER @8...................@F Valid Title(Edit Mode)",
+                        " LEFT/RIGHT/UP/DOWN @8......@F Move Lander",
+                        " LEFT Sft+LEFT/RIGHT @8.....@F Rotate Lander",
+                        " CTRL+UP/DOWN/LEFT/RIGHT@8 .@F Shift landscape ",
+                        " t,b,l,r @8.................@F allow/disallow sub level top/bottom/left/right",
+                        " T,B,L,R @8.................@F move to sub level top/bottom/left/right",
+                        " + / - @8...................@F Change Level Up/Down",
+                        " LEFT MOUSE BUTTON @8.......@F Draw Ground (slowly please to avoid spikes)",
+                        " RIGHT MOUSE BUTTON @8......@F Draw Sky (slowly please to avoid spikes)",
+                        " ",
+                        " @FAuto-save level when leaving Editor @$F10",
+                        " @FAuto-load level when entering Editor @$F10",
+                        " ",
+                        " @ETIP @F: You may use Landscape generator @$F4@F and use the land pad command",
+                        " @E (keep space key down) and move mouse to have a quick landscape design",
+                        "",
+                        "@8Press Any Key to continue")
             else:
-                messageFilename = RedcrabLander.data_path + "m" + str(self.safe_land) + ".lvl"
+                file_name = "m" + str(self.safe_land) + ".lvl"
+                messageFilename = RedcrabLander.data_path + file_name
                 if os.path.exists(messageFilename):
-                    if self.tic2 < 100:
-                        ctx.clear_all_drawing()
-                        if int(self.tic2 / 15) % 2 == 0:
-                            ctx.vectrex_text_big.draw_text(ctx, "incoming transmission",
-                                                           ctx.G_WIDTH / 2.0, ctx.G_HEIGHT / 2, 12)
-                        self.tic2 += 1
-                        return
                     fi = open(messageFilename)
                     m = fi.readlines()
                     fi.close()
                 else:
-                    self.tic = 0
-                    self.tic2 = 0
-                    self.showing_message_screen = self.showing_message_editor_help = False
-                    return
+                    if os.path.exists(RedcrabLander.data_archive):
+                        zf = zipfile.ZipFile(RedcrabLander.data_archive)
+                        try:
+                            fi = io.TextIOWrapper(zf.open(file_name, "r"),
+                                          newline=None)
+                            m = fi.readlines()
+                            fi.close()
+                        except KeyError as ke:
+                            pass
+            return m
+
+        def show_message(self, ctx):
+            if self.tic == 0:
+                self.message = self._get_message()
+                ctx.vectrex_text_big.scale_rotation(7 * ctx.KW, 0)
+
+            if self.message.__len__() == 0:
+                self.tic = 0
+                self.tic2 = 0
+                self.showing_message_screen = self.showing_message_editor_help = False
+                return
+
+            if self.tic2 < 100:
+                ctx.clear_all_drawing()
+                if int(self.tic2 / 15) % 2 == 0:
+                    ctx.vectrex_text_big.draw_text(ctx, "incoming transmission",
+                                                   ctx.G_WIDTH / 2.0, ctx.G_HEIGHT / 2, 12)
+                self.tic2 += 1
+                return
+
+            m = self.message
             lmax = 0
             for aline in m:
                 number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
@@ -1627,13 +1657,13 @@ class RedcrabLander:
                 pg.Color("grey"), pg.Color("blue"), pg.Color("green"), pg.Color("cyan"), pg.Color("red"),
                 pg.Color("magenta"), pg.Color("yellow"), pg.Color("white"))
             self.sound = (
-                pg.mixer.Sound(RedcrabLander.data_path + "andrea-baroni.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "game_over.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "thrust.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "explosion.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "landed.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "SE-Gun-001.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_path + "tzing01.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "andrea-baroni.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "game_over.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "thrust.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "explosion.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "landed.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "SE-Gun-001.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "tzing01.ogg"),
             )
             self.music_channel = None
             self.KW = self.G_WIDTH / 320.0
@@ -1676,7 +1706,7 @@ class RedcrabLander:
             self.sound[4].play()
 
         def sound_play_title(self):
-            self.sound[5].play(maxtime=4000, fade_ms=2000)
+            self.sound[5].play(maxtime=4250, fade_ms=2000)
 
         def sound_play_zing(self):
             self.sound[6].set_volume(0.1)
@@ -1849,6 +1879,8 @@ class RedcrabLander:
             self.clock.tick(int(self.fps))
 
     data_path = "data/"
+    data_asset_path = "asset/"
+    data_archive = data_asset_path + "lander.lvl"
 
     def __init__(self):
         self.run = True
