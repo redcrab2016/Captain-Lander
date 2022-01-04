@@ -1084,8 +1084,9 @@ class RedcrabLander:
                 if ctx.action_edit and self.tic > 60:
                     ctx.sound_unpause()
                     self.status = RedcrabLander.GameStatus.GS_START
-                    self.tic = 0
+                    self.tic = self.tic2 = 0
                     self.save_level(self.safe_land, self.sub_level_x, self.sub_level_y)
+                    self.showing_message_screen = True
                 #  DRAW GROUND (bm== 1) or SKY (bm == 2)
                 if self.bm == 1 or self.bm == 2:
                     if 0 <= int(self.xm) < 320:
@@ -1534,7 +1535,7 @@ class RedcrabLander:
                      " t,b,l,r @8.................@E allow/disallow sub level top/bottom/left/right",
                      "",
                      "@8Landscape",
-                     " F4 @8......................@E Generate a landscape (current level)",
+                     " F4 @8......................@E random a ground landscape (current level and no sky)",
                      " CTRL+UP/DOWN/LEFT/RIGHT@8 .@E Shift landscape ",
                      " LEFT MOUSE BUTTON @8.......@E Draw Ground",
                      " RIGHT MOUSE BUTTON @8......@E Draw Sky",
@@ -1633,7 +1634,7 @@ class RedcrabLander:
                                                        + 6.0) * ctx.KH, colour)
                 i += 1
             self.tic += 1
-            if self.tic > ctx.fps * 35 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
+            if self.tic > ctx.fps * 40 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
                 self.tic = self.tic2 = 0
                 self.showing_message_screen = self.showing_message_editor_help = False
             return

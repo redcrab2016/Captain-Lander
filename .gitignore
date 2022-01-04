@@ -3,6 +3,7 @@ venv/*
 .idea/*
 data/LANDER.SCO
 data/l999.*
+data/*.lvl.backup-*
 data/*.lvl
 main.py
 lander.cs
