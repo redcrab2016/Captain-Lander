@@ -1587,6 +1587,9 @@ class RedcrabLander:
                 self.showing_message_screen = self.showing_message_editor_help = False
                 return
 
+            if self.tic2 == 0:
+                ctx.sound_play_incoming_transmission()
+
             if self.tic2 < 100:
                 ctx.clear_all_drawing()
                 if int(self.tic2 / 15) % 2 == 0:
@@ -1722,6 +1725,7 @@ class RedcrabLander:
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "landed.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "SE-Gun-001.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "tzing01.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "incoming-transmission.ogg")
             )
             self.music_channel = None
             self.KW = self.G_WIDTH / 320.0
@@ -1769,6 +1773,10 @@ class RedcrabLander:
         def sound_play_zing(self):
             self.sound[6].set_volume(0.1)
             self.sound[6].play(maxtime=30)
+
+        def sound_play_incoming_transmission(self):
+            self.sound[7].set_volume(0.5)
+            self.sound[7].play()
 
         def draw_line(self, x1, y1, x2, y2, colour):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
