@@ -30,9 +30,9 @@ class RedcrabLander:
             self.x = 0.0
             self.y = 0.0
 
-    class TV_Alpha:
+    class TV_Glyph:
         def __init__(self):
-            self.alpha = ""
+            self.glyph = ""
 
     class TinyVectrex:
         def __init__(self):
@@ -41,7 +41,7 @@ class RedcrabLander:
             self.size = 0.0
             self.angle = 0.0
             self.cx = 0
-            self.alphabet = tuple(RedcrabLander.TV_Alpha() for _ in range(356))  # [""] * 356
+            self.alphabet = tuple(RedcrabLander.TV_Glyph() for _ in range(356))
             self.boom = 1.0
             self.set_center_text(0.5)
             j = 1
@@ -52,92 +52,92 @@ class RedcrabLander:
                 j += 1
             self.scale_rotation(4.0, 0.0)
             # sign
-            self.alphabet[ord("+")].alpha = "PL NJ"
-            self.alphabet[ord("-")].alpha = "NJ"
-            self.alphabet[ord("*")].alpha = "OK MQ NJ"
-            self.alphabet[ord("/")].alpha = "IE"
-            self.alphabet[ord(":")].alpha = "PP LL"
-            self.alphabet[ord("!")].alpha = "PA LL"
-            self.alphabet[ord(".")].alpha = "LL"
-            self.alphabet[ord(",")].alpha = "LD"
-            self.alphabet[ord("'")].alpha = "HP"
-            self.alphabet[ord("?")].alpha = "OGHIAL DD"
-            self.alphabet[ord("(")].alpha = "HGED"
-            self.alphabet[ord(")")].alpha = "HICD"
-            self.alphabet[ord("_")].alpha = "EC"
-            self.alphabet[ord("~")].alpha = "2E0D2C 2HCBDFEH"  # small ship with thrust
-            self.alphabet[ord("^")].alpha = "2HCBDFEH"  # small ship without thrust
-            self.alphabet[ord("$")].alpha = "HCBDFEH"  # normal-&sized ship
-            self.alphabet[ord("&")].alpha = "2HCBDFEH 0BCDEFGHIB"  # rounded lander
-            self.alphabet[ord("#")].alpha = "JKLMNOPQJ BJ CK DL EM FN GO HP IQ"  # sun
-            self.alphabet[ord("~")].alpha = "GICEG BDFHB"  # star
-            self.alphabet[ord("§")].alpha = "0H3I0B3C0D3E0F3G0H 3I0I 3C0C 3E0E 3G0G"  # Energy sucker
-            self.alphabet[ord("%")].alpha = "BHFNECJB"  # Arrow
+            self.alphabet[ord("+")].glyph = "PL NJ"
+            self.alphabet[ord("-")].glyph = "NJ"
+            self.alphabet[ord("*")].glyph = "OK MQ NJ"
+            self.alphabet[ord("/")].glyph = "IE"
+            self.alphabet[ord(":")].glyph = "PP LL"
+            self.alphabet[ord("!")].glyph = "PA LL"
+            self.alphabet[ord(".")].glyph = "LL"
+            self.alphabet[ord(",")].glyph = "LD"
+            self.alphabet[ord("'")].glyph = "HP"
+            self.alphabet[ord("?")].glyph = "OGHIAL DD"
+            self.alphabet[ord("(")].glyph = "HGED"
+            self.alphabet[ord(")")].glyph = "HICD"
+            self.alphabet[ord("_")].glyph = "EC"
+            self.alphabet[ord("~")].glyph = "2E0D2C 2HCBDFEH"  # small ship with thrust
+            self.alphabet[ord("^")].glyph = "2HCBDFEH"  # small ship without thrust
+            self.alphabet[ord("$")].glyph = "HCBDFEH"  # normal-&sized ship
+            self.alphabet[ord("&")].glyph = "2HCBDFEH 0BCDEFGHIB"  # rounded lander
+            self.alphabet[ord("#")].glyph = "JKLMNOPQJ BJ CK DL EM FN GO HP IQ"  # sun
+            self.alphabet[ord("~")].glyph = "GICEG BDFHB"  # star
+            self.alphabet[ord("§")].glyph = "0H3I0B3C0D3E0F3G0H 3I0I 3C0C 3E0E 3G0G"  # Energy sucker
+            self.alphabet[ord("%")].glyph = "BHFNECJB"  # Arrow
             #  Digit
-            self.alphabet[ord("0")].alpha = "EIHGEDCI"
-            self.alphabet[ord("1")].alpha = "GHL"
-            self.alphabet[ord("2")].alpha = "GHIEC"
-            self.alphabet[ord("3")].alpha = "GHIACDE"
-            self.alphabet[ord("4")].alpha = "LHNJ"
-            self.alphabet[ord("5")].alpha = "IGNJCDE"
-            self.alphabet[ord("6")].alpha = "IHGEDCJN"
-            self.alphabet[ord("7")].alpha = "GIL"
-            self.alphabet[ord("8")].alpha = "NGHICDENJ"
-            self.alphabet[ord("9")].alpha = "JNGHICDE"
+            self.alphabet[ord("0")].glyph = "EIHGEDCI"
+            self.alphabet[ord("1")].glyph = "GHL"
+            self.alphabet[ord("2")].glyph = "GHIEC"
+            self.alphabet[ord("3")].glyph = "GHIACDE"
+            self.alphabet[ord("4")].glyph = "LHNJ"
+            self.alphabet[ord("5")].glyph = "IGNJCDE"
+            self.alphabet[ord("6")].glyph = "IHGEDCJN"
+            self.alphabet[ord("7")].glyph = "GIL"
+            self.alphabet[ord("8")].glyph = "NGHICDENJ"
+            self.alphabet[ord("9")].glyph = "JNGHICDE"
             #  Alphabet Uppercase
-            self.alphabet[ord("A")].alpha = "ENOPQJC NJ"
-            self.alphabet[ord("B")].alpha = "EGPQAKLE NA"
-            self.alphabet[ord("C")].alpha = "KLMNOPQ"
-            self.alphabet[ord("D")].alpha = "EGPQJKLE"
-            self.alphabet[ord("E")].alpha = "IGEC NA"
-            self.alphabet[ord("F")].alpha = "IGE NA"
-            self.alphabet[ord("G")].alpha = "AJKLMNOPQ"
-            self.alphabet[ord("H")].alpha = "GE IC NJ"
-            self.alphabet[ord("I")].alpha = "PL"
-            self.alphabet[ord("J")].alpha = "QKLM"
-            self.alphabet[ord("K")].alpha = "GE NP NC"
-            self.alphabet[ord("L")].alpha = "GEC"
-            self.alphabet[ord("M")].alpha = "EGAIC"
-            self.alphabet[ord("N")].alpha = "EGCI"
-            self.alphabet[ord("O")].alpha = "JKLMNOPQJ"
-            self.alphabet[ord("P")].alpha = "EGPQAN"
-            self.alphabet[ord("Q")].alpha = "AKLMNOPQJK"
-            self.alphabet[ord("R")].alpha = "EGPQAN AC"
-            self.alphabet[ord("S")].alpha = "QPOKLM"
-            self.alphabet[ord("T")].alpha = "PL GI"
-            self.alphabet[ord("U")].alpha = "GNMLKJI"
-            self.alphabet[ord("V")].alpha = "GLI"
-            self.alphabet[ord("W")].alpha = "GEACI"
-            self.alphabet[ord("X")].alpha = "GC EI"
-            self.alphabet[ord("Y")].alpha = "GAI AL"
-            self.alphabet[ord("Z")].alpha = "GIEC"
+            self.alphabet[ord("A")].glyph = "ENOPQJC NJ"
+            self.alphabet[ord("B")].glyph = "EGPQAKLE NA"
+            self.alphabet[ord("C")].glyph = "KLMNOPQ"
+            self.alphabet[ord("D")].glyph = "EGPQJKLE"
+            self.alphabet[ord("E")].glyph = "IGEC NA"
+            self.alphabet[ord("F")].glyph = "IGE NA"
+            self.alphabet[ord("G")].glyph = "AJKLMNOPQ"
+            self.alphabet[ord("H")].glyph = "GE IC NJ"
+            self.alphabet[ord("I")].glyph = "PL"
+            self.alphabet[ord("J")].glyph = "QKLM"
+            self.alphabet[ord("K")].glyph = "GE NP NC"
+            self.alphabet[ord("L")].glyph = "GEC"
+            self.alphabet[ord("M")].glyph = "EGAIC"
+            self.alphabet[ord("N")].glyph = "EGCI"
+            self.alphabet[ord("O")].glyph = "JKLMNOPQJ"
+            self.alphabet[ord("P")].glyph = "EGPQAN"
+            self.alphabet[ord("Q")].glyph = "AKLMNOPQJK"
+            self.alphabet[ord("R")].glyph = "EGPQAN AC"
+            self.alphabet[ord("S")].glyph = "QPOKLM"
+            self.alphabet[ord("T")].glyph = "PL GI"
+            self.alphabet[ord("U")].glyph = "GNMLKJI"
+            self.alphabet[ord("V")].glyph = "GLI"
+            self.alphabet[ord("W")].glyph = "GEACI"
+            self.alphabet[ord("X")].glyph = "GC EI"
+            self.alphabet[ord("Y")].glyph = "GAI AL"
+            self.alphabet[ord("Z")].glyph = "GIEC"
             # Alphabet lower case
-            self.alphabet[ord("a")].alpha = "1ENOPQJC NJ"
-            self.alphabet[ord("b")].alpha = "1EGPQAKLE NA"
-            self.alphabet[ord("c")].alpha = "1KLMNOPQ"
-            self.alphabet[ord("d")].alpha = "1EGPQJKLE"
-            self.alphabet[ord("e")].alpha = "1IGEC NA"
-            self.alphabet[ord("f")].alpha = "1IGE NA"
-            self.alphabet[ord("g")].alpha = "1AJKLMNOPQ"
-            self.alphabet[ord("h")].alpha = "1GE IC NJ"
-            self.alphabet[ord("i")].alpha = "1PL"
-            self.alphabet[ord("j")].alpha = "1QKLM"
-            self.alphabet[ord("k")].alpha = "1GE NP NC"
-            self.alphabet[ord("l")].alpha = "1GEC"
-            self.alphabet[ord("m")].alpha = "1EGAIC"
-            self.alphabet[ord("n")].alpha = "1EGCI"
-            self.alphabet[ord("o")].alpha = "1JKLMNOPQJ"
-            self.alphabet[ord("p")].alpha = "1EGPQAN"
-            self.alphabet[ord("q")].alpha = "1AKLMNOPQJK"
-            self.alphabet[ord("r")].alpha = "1EGPQAN AC"
-            self.alphabet[ord("s")].alpha = "1QPOKLM"
-            self.alphabet[ord("t")].alpha = "1PL GI"
-            self.alphabet[ord("u")].alpha = "1GNMLKJI"
-            self.alphabet[ord("v")].alpha = "1GLI"
-            self.alphabet[ord("w")].alpha = "1GEACI"
-            self.alphabet[ord("x")].alpha = "1GC EI"
-            self.alphabet[ord("y")].alpha = "1GAI AL"
-            self.alphabet[ord("z")].alpha = "1GIEC"
+            self.alphabet[ord("a")].glyph = "1ENOPQJC NJ"
+            self.alphabet[ord("b")].glyph = "1EGPQAKLE NA"
+            self.alphabet[ord("c")].glyph = "1KLMNOPQ"
+            self.alphabet[ord("d")].glyph = "1EGPQJKLE"
+            self.alphabet[ord("e")].glyph = "1IGEC NA"
+            self.alphabet[ord("f")].glyph = "1IGE NA"
+            self.alphabet[ord("g")].glyph = "1AJKLMNOPQ"
+            self.alphabet[ord("h")].glyph = "1GE IC NJ"
+            self.alphabet[ord("i")].glyph = "1PL"
+            self.alphabet[ord("j")].glyph = "1QKLM"
+            self.alphabet[ord("k")].glyph = "1GE NP NC"
+            self.alphabet[ord("l")].glyph = "1GEC"
+            self.alphabet[ord("m")].glyph = "1EGAIC"
+            self.alphabet[ord("n")].glyph = "1EGCI"
+            self.alphabet[ord("o")].glyph = "1JKLMNOPQJ"
+            self.alphabet[ord("p")].glyph = "1EGPQAN"
+            self.alphabet[ord("q")].glyph = "1AKLMNOPQJK"
+            self.alphabet[ord("r")].glyph = "1EGPQAN AC"
+            self.alphabet[ord("s")].glyph = "1QPOKLM"
+            self.alphabet[ord("t")].glyph = "1PL GI"
+            self.alphabet[ord("u")].glyph = "1GNMLKJI"
+            self.alphabet[ord("v")].glyph = "1GLI"
+            self.alphabet[ord("w")].glyph = "1GEACI"
+            self.alphabet[ord("x")].glyph = "1GC EI"
+            self.alphabet[ord("y")].glyph = "1GAI AL"
+            self.alphabet[ord("z")].glyph = "1GIEC"
 
         def set_center_text(self, cenx):
             self.cx = cenx
@@ -149,34 +149,30 @@ class RedcrabLander:
             self.size = psize
             self.angle = pangle
 
-        def draw_script(self, ctx, s, xc, yc, colour, explode=None):
+        def draw_script(self, ctx, glyph_design, xc, yc, colour, explode=None):
             explode = self.boom if explode is None else explode
             default_colour = colour
             xo = 0.0
             yo = 0.0
             k = 1
-            b = 0
-            if s is None:
+            pen_is_up = True
+            if glyph_design is None:
                 return
-            ss = " " + s.upper()
-            instructIdx = iter(range(ss.__len__()))
-            for i in instructIdx:
-                c = ss[i]
-                if c == "$":
-                    i = next(instructIdx)
-                    c = ss[i]
-                    a = ord(c)
-                    if 48 <= a <= 57:
-                        a -= 48
-                    elif 65 <= a <= 70:
-                        a -= 55
+            glyph_primitives = iter(glyph_design)
+            for glyph_primitive in glyph_primitives:
+                if glyph_primitive == "$":
+                    glyph_primitive = next(glyph_primitives)
+                    colour = ord(glyph_primitive)
+                    if 48 <= colour <= 57:
+                        colour -= 48
+                    elif 65 <= colour <= 70:
+                        colour -= 55
                     else:
-                        a = default_colour
-                    colour = a
-                elif c == " ":
-                    b = 1
+                        colour = default_colour
+                elif glyph_primitive == " ":
+                    pen_is_up = True
                 else:
-                    a = ord(c)
+                    a = ord(glyph_primitive)
                     if 65 <= a < (65 + 17):
                         a -= 65
                         if k == 1.0:
@@ -185,7 +181,7 @@ class RedcrabLander:
                         else:
                             x = self.plotxy[a].x * k + xc
                             y = self.plotxy[a].y * k + yc
-                        if b == 0:
+                        if not pen_is_up:
                             if explode == 1.0:
                                 ctx.draw_line(xo, yo, x, y, colour)
                             else:
@@ -200,14 +196,14 @@ class RedcrabLander:
                                 ctx.draw_line(x1, y1, x2, y2, colour)
                         xo = x
                         yo = y
-                        b = 0
-                    else:
+                        pen_is_up = False
+                    else: # Factor for sub grid
                         if 48 <= a <= 57:  # from 0 to 9
-                            if a == 48:  # 0 is 1
+                            if a == 48:  # 0 is 1 : square_root_of_2 power 0
                                 k = 1.0
-                            elif a == 49: # 1 is square root of 2
+                            elif a == 49:  # 1 is square_root_of_2 power 1
                                 k = 0.70710678118654752440084436210485
-                            else:
+                            else:  # square_root_of_2 power n (2 to 9)
                                 k = 0.70710678118654752440084436210485 ** (a - 48)
 
         def draw_text(self, ctx, s, xc, yc, colour, text_angle=None):
@@ -217,7 +213,7 @@ class RedcrabLander:
             dy = self.size * math.sin(text_angle) * 1.80
             j = 0
             for letter in s:
-                self.draw_script(ctx, self.alphabet[ord(letter)].alpha,
+                self.draw_script(ctx, self.alphabet[ord(letter)].glyph,
                                  (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
                 j += 1
 
@@ -244,7 +240,7 @@ class RedcrabLander:
                     read_colour = False
                 else:
                     a = ord(letter)
-                    self.draw_script(ctx, self.alphabet[a].alpha, (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
+                    self.draw_script(ctx, self.alphabet[a].glyph, (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
                     j += 1
 
         def draw_text_length(self, s):
@@ -603,7 +599,7 @@ class RedcrabLander:
             #  Sucker
             for i in range(self.number_of_sucker):
                 self.sucker[i].draw(ctx)
-            # Score
+            #  Score
             if self.status != RedcrabLander.GameStatus.GS_EDIT and \
                     self.status != RedcrabLander.GameStatus.GS_EDIT_TEXT:
                 ctx.vectrex_board_text.draw_text(ctx, " & " + str(self.safe_land) + "  # " + str(self.score),
