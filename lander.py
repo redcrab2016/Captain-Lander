@@ -1590,7 +1590,10 @@ class RedcrabLander:
             if self.tic2 == 0:
                 ctx.sound_play_incoming_transmission()
 
-            if self.tic2 < 100:
+            if self.tic2 == 50:
+                ctx.sound_play_modem()
+
+            if self.tic2 < 150:
                 ctx.clear_all_drawing()
                 if int(self.tic2 / 15) % 2 == 0:
                     ctx.vectrex_text_big.draw_text(ctx, "incoming transmission",
@@ -1631,10 +1634,10 @@ class RedcrabLander:
                 if self.showing_message_editor_help:
                     ctx.vectrex_text_small.draw_text_rich(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
-                    ctx.vectrex_text_1.draw_text_rich(ctx, aline.rstrip('\n'),
-                                                      ctx.G_WIDTH / 2.0,
-                                                      ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
-                                                       + 6.0) * ctx.KH, colour)
+                        ctx.vectrex_text_1.draw_text_rich(ctx, aline.rstrip('\n'),
+                                                          ctx.G_WIDTH / 2.0,
+                                                          ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
+                                                          + 6.0) * ctx.KH, colour)
                 i += 1
             self.tic += 1
             if self.tic > ctx.fps * 40 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
@@ -1725,7 +1728,8 @@ class RedcrabLander:
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "landed.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "SE-Gun-001.ogg"),
                 pg.mixer.Sound(RedcrabLander.data_asset_path + "tzing01.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "incoming-transmission.ogg")
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "incoming-transmission.ogg"),
+                pg.mixer.Sound(RedcrabLander.data_asset_path + "modem.ogg")
             )
             self.music_channel = None
             self.KW = self.G_WIDTH / 320.0
@@ -1777,6 +1781,10 @@ class RedcrabLander:
         def sound_play_incoming_transmission(self):
             self.sound[7].set_volume(0.5)
             self.sound[7].play()
+
+        def sound_play_modem(self):
+            self.sound[8].set_volume(0.2)
+            self.sound[8].play()
 
         def draw_line(self, x1, y1, x2, y2, colour):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
