@@ -3,6 +3,8 @@
 
 A Python 3 project with pygame
 
+![Captain Lander](lander.png)
+
 This project is a portage of the Freebasic game freely available at http://games.freebasic.net/startdownload.php?file=L/lander.zip&gameID=59
 and explained in Freebasic forum at https://www.freebasic.net/forum/viewtopic.php?f=8&t=8405 
 
