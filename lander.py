@@ -197,7 +197,7 @@ class RedcrabLander:
                         xo = x
                         yo = y
                         pen_is_up = False
-                    else: # Factor for sub grid
+                    else:  # Factor for sub grid
                         if 48 <= a <= 57:  # from 0 to 9
                             if a == 48:  # 0 is 1 : square_root_of_2 power 0
                                 k = 1.0
@@ -1347,8 +1347,8 @@ class RedcrabLander:
                         else:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
-                            self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground + \
-                                self.ship.size * 0.80
+                            self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground \
+                                                   + self.ship.size * 0.80
                     else:
                         self.status = RedcrabLander.GameStatus.GS_CRASHED
                         self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
@@ -1583,13 +1583,13 @@ class RedcrabLander:
                 self.showing_message_screen = self.showing_message_editor_help = False
                 return
 
-            if self.tic2 == 0:
-                ctx.sound_play_incoming_transmission()
+            if self.tic2 < ctx.fps * 3:
+                if self.tic2 == 0:
+                    ctx.sound_play_incoming_transmission()
 
-            if self.tic2 == 50:
-                ctx.sound_play_modem()
+                if self.tic2 == ctx.fps:
+                    ctx.sound_play_modem()
 
-            if self.tic2 < 150:
                 ctx.clear_all_drawing()
                 if int(self.tic2 / 15) % 2 == 0:
                     ctx.vectrex_text_big.draw_text(ctx, "incoming transmission",
@@ -1630,10 +1630,12 @@ class RedcrabLander:
                 if self.showing_message_editor_help:
                     ctx.vectrex_text_small.draw_text_rich(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
-                        ctx.vectrex_text_1.draw_text_rich(ctx, aline.rstrip('\n'),
-                                                          ctx.G_WIDTH / 2.0,
-                                                          ((24 - (limit if limit < m.__len__() else m.__len__()) + i) * 9.0
-                                                          + 6.0) * ctx.KH, colour)
+                    ctx.vectrex_text_1.draw_text_rich(ctx,
+                                                      aline.rstrip('\n'),
+                                                      ctx.G_WIDTH / 2.0,
+                                                      ((24 - (limit if limit < m.__len__() else m.__len__()) + i)
+                                                       * 9.0 + 6.0) * ctx.KH,
+                                                      colour)
                 i += 1
             self.tic += 1
             if self.tic > ctx.fps * 40 or (ctx.is_any_key_pressed() and self.tic > ctx.fps * 3):
@@ -1651,7 +1653,6 @@ class RedcrabLander:
         def __init__(self):
             self.frames = 0
             self.slow_host = False
-            self.data_path = "data/"
             self.action_mouse_button1 = False
             self.action_mouse_button2 = False
             self.action_mouse_button3 = False
@@ -1701,7 +1702,8 @@ class RedcrabLander:
             pg.init()
             self.clock = pg.time.Clock()
             self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT))
-            pg.display.set_caption('Redcrab Lander')
+            pg.display.set_caption('Captain Lander')
+            pg.display.set_icon(pg.image.load(RedcrabLander.data_asset_path + "icon.png"))
             self.number_segment_circle = 16
             self.key_text = ""
             self.vectrex_memory = tuple(RedcrabLander.GameContext.VectrexMemory() for _ in range(10000))
