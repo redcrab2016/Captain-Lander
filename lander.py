@@ -1969,16 +1969,18 @@ class CaptainLander:
     data_archive = data_asset_path + "lander.lvl"
 
     def __init__(self):
+        self.run = False
+        self.game = None
+        self.game_context = None
+        print("Captain Lander ready")
+
+    def play(self):
+        print("Captain Lander running")
         self.run = True
         self.game = CaptainLander.Game()
         self.game_context = CaptainLander.GameContext()
-        self.timer = 0.0
         self.game_context.fps = 50
-        print("Captain Lander running")
         self.game_context.sound_play_score()
-
-    def play(self):
-        self.run = True
         while self.run or self.game.showing_message_screen:
             self.game_context.capture_input()
             if self.game.showing_message_screen:
