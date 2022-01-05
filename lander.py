@@ -1,12 +1,15 @@
-#              ___        _             _
-#             | _ \___ __| |__ _ _ __ _| |__
-#             |   / -_) _` / _| '_/ _` | '_ \
-#             |_|_\___\__,_\__|_| \__,_|_.__/
-#                  | |   __ _ _ _  __| |___ _ _
-#                  | |__/ _` | ' \/ _` / -_) '_|
-#                  |____\__,_|_||_\__,_\___|_|
-
+#     ___           _        _
+#    / __|__ _ _ __| |_ __ _(_)_ _
+#   | (__/ _` | '_ \  _/ _` | | ' \
+#    \___\__,_| .__/\__\__,_|_|_||_|
+#     | |   __|_|_ _  __| |___ _ _
+#     | |__/ _` | ' \/ _` / -_) '_|
+#     |____\__,_|_||_\__,_\___|_|
+#
 # Portage of Redcrab Lander 1.4.1, initially design with FreeBasic
+# Discussed at https://www.freebasic.net/forum/viewtopic.php?f=8&t=8405
+# FreeBasic version available at http://games.freebasic.net/startdownload.php?file=L/lander.zip&gameID=59
+
 
 import pygame as pg
 from pygame.locals import *
@@ -19,7 +22,7 @@ import zipfile
 import io
 
 
-class RedcrabLander:
+class CaptainLander:
     class TV_Polar2D:
         def __init__(self):
             self.radius = 0.0
@@ -36,13 +39,23 @@ class RedcrabLander:
 
     class TinyVectrex:
         def __init__(self):
-            self.plot = tuple(RedcrabLander.TV_Polar2D() for _ in range(18))
-            self.plotxy = tuple(RedcrabLander.TV_vertex2D() for _ in range(18))
+            self.plot = tuple(CaptainLander.TV_Polar2D() for _ in range(18))
+            self.plotxy = tuple(CaptainLander.TV_vertex2D() for _ in range(18))
             self.size = 0.0
             self.angle = 0.0
             self.cx = 0
-            self.alphabet = tuple(RedcrabLander.TV_Glyph() for _ in range(356))
+            self.alphabet = tuple(CaptainLander.TV_Glyph() for _ in range(356))
             self.boom = 1.0
+            self.__grid_factor = (((2 ** .5) / 2) ** 0,
+                                  ((2 ** .5) / 2) ** 1,
+                                  ((2 ** .5) / 2) ** 2,
+                                  ((2 ** .5) / 2) ** 3,
+                                  ((2 ** .5) / 2) ** 4,
+                                  ((2 ** .5) / 2) ** 5,
+                                  ((2 ** .5) / 2) ** 6,
+                                  ((2 ** .5) / 2) ** 7,
+                                  ((2 ** .5) / 2) ** 8,
+                                  ((2 ** .5) / 2) ** 9)
             self.set_center_text(0.5)
             j = 1
             for i in np.linspace(0, 1.75 * np.pi, 8):
@@ -139,25 +152,25 @@ class RedcrabLander:
             self.alphabet[ord("y")].glyph = "1GAI AL"
             self.alphabet[ord("z")].glyph = "1GIEC"
 
-        def set_center_text(self, cenx):
-            self.cx = cenx
+        def set_center_text(self, center):
+            self.cx = center
 
-        def scale_rotation(self, psize, pangle):
+        def scale_rotation(self, scale, rotation):
             for i in range(18):
-                self.plotxy[i].x = psize * math.cos(pangle + self.plot[i].angle) * self.plot[i].radius
-                self.plotxy[i].y = psize * math.sin(pangle + self.plot[i].angle) * self.plot[i].radius
-            self.size = psize
-            self.angle = pangle
+                self.plotxy[i].x = scale * math.cos(rotation + self.plot[i].angle) * self.plot[i].radius
+                self.plotxy[i].y = scale * math.sin(rotation + self.plot[i].angle) * self.plot[i].radius
+            self.size = scale
+            self.angle = rotation
 
-        def draw_script(self, ctx, glyph_design, xc, yc, colour, explode=None):
+        def draw_glyph(self, ctx, glyph_design, xc, yc, colour, explode=None):
+            if glyph_design is None:
+                return
             explode = self.boom if explode is None else explode
             default_colour = colour
             xo = 0.0
             yo = 0.0
             k = 1
             pen_is_up = True
-            if glyph_design is None:
-                return
             glyph_primitives = iter(glyph_design)
             for glyph_primitive in glyph_primitives:
                 if glyph_primitive == "$":
@@ -199,12 +212,7 @@ class RedcrabLander:
                         pen_is_up = False
                     else:  # Factor for sub grid
                         if 48 <= a <= 57:  # from 0 to 9
-                            if a == 48:  # 0 is 1 : square_root_of_2 power 0
-                                k = 1.0
-                            elif a == 49:  # 1 is square_root_of_2 power 1
-                                k = 0.70710678118654752440084436210485
-                            else:  # square_root_of_2 power n (2 to 9)
-                                k = 0.70710678118654752440084436210485 ** (a - 48)
+                            k = self.__grid_factor[a - 48]
 
         def draw_text(self, ctx, text_content, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
@@ -214,11 +222,11 @@ class RedcrabLander:
             current_x = -c * dx + xc
             current_y = -c * dy + yc
             for letter in text_content:
-                self.draw_script(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
+                self.draw_glyph(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
                 current_x += dx
                 current_y += dy
 
-        def draw_text_rich(self, ctx, text_content, xc, yc, colour, text_angle=None):
+        def draw_rich_text(self, ctx, text_content, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
             c, _ = self.draw_text_length(text_content)
             c = float(c * self.cx)
@@ -241,7 +249,7 @@ class RedcrabLander:
                         colour = default_colour
                     read_colour = False
                 else:
-                    self.draw_script(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
+                    self.draw_glyph(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
                     current_x += dx
                     current_y += dy
 
@@ -253,7 +261,6 @@ class RedcrabLander:
             for c in it:
                 if c == "@":
                     next(it)
-                    number_character += 1
                 else:
                     number_character += 1
             return number_character, self.size * 1.8 * number_character
@@ -299,13 +306,13 @@ class RedcrabLander:
             self.LANDER_NORMAL = "$F2HCBDFEH"
             self.LANDER_LANDED = "$F2HCBDFEH"
             self.LANDER_THRUST = "$E2E0D2C$$ $F2HCBDFEH"
-            self.model = RedcrabLander.TinyVectrex()
-            self.location = RedcrabLander.Vertex2D()
-            self.speed = RedcrabLander.Vertex2D()
+            self.model = CaptainLander.TinyVectrex()
+            self.location = CaptainLander.Vertex2D()
+            self.speed = CaptainLander.Vertex2D()
             self.fuel = 0.0
             self.angle = 0.0
             self.size = 0.0
-            self.status = RedcrabLander.LanderStatus.LS_NORMAL
+            self.status = CaptainLander.LanderStatus.LS_NORMAL
             self.crash_tic = 0
             self.noise_tic = 0
             self.tic = 0
@@ -319,7 +326,7 @@ class RedcrabLander:
             self.fuel = 100
             self.angle = 0
             self.size = 7
-            self.status = RedcrabLander.LanderStatus.LS_NORMAL
+            self.status = CaptainLander.LanderStatus.LS_NORMAL
             self.crash_tic = 0
             self.tic = 0
             self.noise_tic = 0
@@ -328,24 +335,24 @@ class RedcrabLander:
         def draw(self, ctx):
             self.model.scale_rotation(self.size * 2 * ctx.KW, self.angle)
             self.tic += 1
-            if self.status == RedcrabLander.LanderStatus.LS_NORMAL:
+            if self.status == CaptainLander.LanderStatus.LS_NORMAL:
                 self.crash_tic = 0
                 self.model.boom = 1
-                self.model.draw_script(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                       ((240 - self.location.y) * ctx.KH), 10)
+                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
+                                      ((240 - self.location.y) * ctx.KH), 10)
                 if self.fuel <= 0:
                     ctx.vectrex_text_small.draw_text(ctx, "I'M CRASHING!", (self.location.x * ctx.KW),
                                                      ((240 - self.location.y - self.size - 7) * ctx.KH), 15)
-            elif self.status == RedcrabLander.LanderStatus.LS_LANDED or \
-                    self.status == RedcrabLander.LanderStatus.LS_LANDED_NO_SKY:
+            elif self.status == CaptainLander.LanderStatus.LS_LANDED or \
+                    self.status == CaptainLander.LanderStatus.LS_LANDED_NO_SKY:
                 self.crash_tic = 0
                 self.model.boom = 1
-                self.model.draw_script(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                       ((240 - self.location.y) * ctx.KH), 10)
+                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
+                                      ((240 - self.location.y) * ctx.KH), 10)
                 ctx.draw_circle(self.location.x * ctx.KW, (240 - self.location.y) * ctx.KH,
                                 (self.size + 5 + 3 * math.sin(self.tic / 10.0)) * ctx.KW, 8)
                 if 70 <= self.fuel <= 99:
-                    if self.status == RedcrabLander.LanderStatus.LS_LANDED:
+                    if self.status == CaptainLander.LanderStatus.LS_LANDED:
                         ctx.vectrex_text_small.draw_text(ctx, "Launch To " +
                                                          str(int(3 - ((self.fuel - 70.0) / 30 * 4))),
                                                          (self.location.x * ctx.KW),
@@ -353,56 +360,56 @@ class RedcrabLander:
                     else:
                         ctx.vectrex_text_small.draw_text(ctx, "I'm Ready !", (self.location.x * ctx.KW),
                                                          ((240 - self.location.y - self.size - 7) * ctx.KH), 15)
-                if self.fuel >= 100 and self.location.y < 300 and self.status == RedcrabLander.LanderStatus.LS_LANDED:
+                if self.fuel >= 100 and self.location.y < 300 and self.status == CaptainLander.LanderStatus.LS_LANDED:
                     self.angle = 0
                     self.location.y *= 1.01
 
-            if self.status == RedcrabLander.LanderStatus.LS_CRASH:
+            if self.status == CaptainLander.LanderStatus.LS_CRASH:
                 self.crash_tic += 1
 
                 if self.crash_tic < 60:
                     self.model.boom = 1 - self.crash_tic / 15.0
-                    self.model.draw_script(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                           ((240 - self.location.y) * ctx.KH), 10)
-            if self.status == RedcrabLander.LanderStatus.LS_THRUST:
+                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
+                                          ((240 - self.location.y) * ctx.KH), 10)
+            if self.status == CaptainLander.LanderStatus.LS_THRUST:
                 self.noise_tic = 0
 
                 if self.tic % 20 < self.fuel / 5 and self.fuel > 0:
-                    self.model.draw_script(ctx, self.LANDER_THRUST, (self.location.x * ctx.KW),
-                                           ((240 - self.location.y) * ctx.KH), 10)
+                    self.model.draw_glyph(ctx, self.LANDER_THRUST, (self.location.x * ctx.KW),
+                                          ((240 - self.location.y) * ctx.KH), 10)
                     if self.tic % 3 == 0:
                         ctx.sound_play_thrust()  # SoundManager.instance.NoiseStart();
                 else:
-                    self.model.draw_script(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                           ((240 - self.location.y) * ctx.KH), 10)
-            if self.status != RedcrabLander.LanderStatus.LS_THRUST:
+                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
+                                          ((240 - self.location.y) * ctx.KH), 10)
+            if self.status != CaptainLander.LanderStatus.LS_THRUST:
                 self.noise_tic += 1
                 #  if (self.noise_tic>5) SoundManager.instance.NoiseStop();
 
     class EnergySucker:
         def __init__(self):
             self.EnergySucker_NORMAL = "$C0H3I0B3C0D3E0F3G0H $E3I0I 3C0C 3E0E 3G0G"
-            self.model = RedcrabLander.TinyVectrex()
-            self.location = RedcrabLander.Vertex2D()
-            self.speed = RedcrabLander.Vertex2D()
+            self.model = CaptainLander.TinyVectrex()
+            self.location = CaptainLander.Vertex2D()
+            self.speed = CaptainLander.Vertex2D()
             self.angle = 0.0
             self.size = 0.0
             self.tic = 0
-            self.status = RedcrabLander.EnergySuckerStatus.SS_NORMAL
+            self.status = CaptainLander.EnergySuckerStatus.SS_NORMAL
             self.init()
 
         def draw(self, ctx):
             self.tic += 1
-            if self.status == RedcrabLander.EnergySuckerStatus.SS_NORMAL:
+            if self.status == CaptainLander.EnergySuckerStatus.SS_NORMAL:
                 self.model.scale_rotation(self.size * ctx.KW, self.tic * np.pi / 90.0)
-                self.model.draw_script(ctx, self.EnergySucker_NORMAL, (self.location.x * ctx.KW),
-                                       ((240 - self.location.y) * ctx.KH), 10)
-            elif self.status == RedcrabLander.EnergySuckerStatus.SS_EXPLODED:
+                self.model.draw_glyph(ctx, self.EnergySucker_NORMAL, (self.location.x * ctx.KW),
+                                      ((240 - self.location.y) * ctx.KH), 10)
+            elif self.status == CaptainLander.EnergySuckerStatus.SS_EXPLODED:
                 pass  # future evolution : when energy sucker are destroyable
 
         def init(self, x=0, y=0):
             self.tic = 0
-            self.status = RedcrabLander.EnergySuckerStatus.SS_NORMAL
+            self.status = CaptainLander.EnergySuckerStatus.SS_NORMAL
             self.location.x = 0
             self.location.y = 0
             self.speed.x = 0
@@ -420,11 +427,11 @@ class RedcrabLander:
                 self.sky = 0
 
         def __init__(self):
-            self.landscape = tuple(RedcrabLander.Scene.Landscape() for _ in range(320))
-            self.pad_location = RedcrabLander.Vertex2D()
-            self.fuel_location = RedcrabLander.Vertex2D()
+            self.landscape = tuple(CaptainLander.Scene.Landscape() for _ in range(320))
+            self.pad_location = CaptainLander.Vertex2D()
+            self.fuel_location = CaptainLander.Vertex2D()
             self.gravity = 0.0
-            self.start_location = RedcrabLander.Vertex2D()
+            self.start_location = CaptainLander.Vertex2D()
             self.inverse = 0
             self.tic = 0
             self.go_up = 0
@@ -531,12 +538,12 @@ class RedcrabLander:
             self.showing_message_screen = True
             self.showing_message_editor_help = False
             self.message = tuple()
-            self.ship = RedcrabLander.Lander()
-            self.sucker = tuple(RedcrabLander.EnergySucker() for _ in range(101))
+            self.ship = CaptainLander.Lander()
+            self.sucker = tuple(CaptainLander.EnergySucker() for _ in range(101))
             self.number_of_sucker = 0
-            self.scene = RedcrabLander.Scene()
-            self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
-            self.status = RedcrabLander.GameStatus.GS_INTRO
+            self.scene = CaptainLander.Scene()
+            self.player_action = CaptainLander.PlayerAction.PA_NOTHING
+            self.status = CaptainLander.GameStatus.GS_INTRO
             self.level_title = [""] * 201
             self.xm = 0.0
             self.ym = 0.0
@@ -547,7 +554,7 @@ class RedcrabLander:
             self.best_safe_land = 0
             self.best_score = 0
             try:
-                btf = open(RedcrabLander.data_path + "LANDER.SCO")
+                btf = open(CaptainLander.data_path + "LANDER.SCO")
                 self.best_score = int(btf.readline())
                 self.best_safe_land = int(btf.readline())
                 btf.close()
@@ -585,14 +592,14 @@ class RedcrabLander:
             self.safe_land = 0
             self.score = 0
             self.life = 3
-            self.status = RedcrabLander.GameStatus.GS_INTRO
+            self.status = CaptainLander.GameStatus.GS_INTRO
             self.tic = 0
             self.tic2 = 0
             self.number_of_sucker = 0
             self.init_level(0)
 
         def draw(self, ctx):
-            aLife = RedcrabLander.Lander()
+            aLife = CaptainLander.Lander()
             ctx.clear_all_drawing()
             #  Landscape
             self.scene.draw(ctx)
@@ -602,8 +609,8 @@ class RedcrabLander:
             for i in range(self.number_of_sucker):
                 self.sucker[i].draw(ctx)
             #  Score
-            if self.status != RedcrabLander.GameStatus.GS_EDIT and \
-                    self.status != RedcrabLander.GameStatus.GS_EDIT_TEXT:
+            if self.status != CaptainLander.GameStatus.GS_EDIT and \
+                    self.status != CaptainLander.GameStatus.GS_EDIT_TEXT:
                 ctx.vectrex_board_text.draw_text(ctx, " & " + str(self.safe_land) + "  # " + str(self.score),
                                                  0, (234 * ctx.KH), 10)
             else:
@@ -616,10 +623,10 @@ class RedcrabLander:
                     self.sub_level_y) + ")" + m, 0, (234 * ctx.KH), 10)
 
             # Life
-            if self.status != RedcrabLander.GameStatus.GS_EDIT and \
-                    self.status != RedcrabLander.GameStatus.GS_EDIT_TEXT:
+            if self.status != CaptainLander.GameStatus.GS_EDIT and \
+                    self.status != CaptainLander.GameStatus.GS_EDIT_TEXT:
                 aLife.size = 5
-                aLife.status = RedcrabLander.LanderStatus.LS_NORMAL
+                aLife.status = CaptainLander.LanderStatus.LS_NORMAL
                 aLife.location.y = 6
                 for i in range(1, self.life + 1):
                     aLife.location.x = 88 + 25 + (i - 1) * 12
@@ -662,7 +669,7 @@ class RedcrabLander:
             ctx.draw_box(265 * ctx.KW, 231 * ctx.KH, (265 + 60 / 2) * ctx.KW, 239 * ctx.KH, 15)
             ctx.draw_box(265 * ctx.KW, 231 * ctx.KH, (265 + 50) * ctx.KW, 239 * ctx.KH, 15)
 
-            if self.status == RedcrabLander.GameStatus.GS_START:
+            if self.status == CaptainLander.GameStatus.GS_START:
                 #  START
                 if self.tic2 < 200:
                     ctx.vectrex_text_1.draw_text(ctx, self.level_title[self.safe_land], ctx.G_WIDTH / 2.0,
@@ -674,7 +681,7 @@ class RedcrabLander:
                     ctx.vectrex_text_1.draw_text(ctx, self.level_title[self.safe_land],
                                                  ctx.G_WIDTH / 2.0, (120.0 * ctx.KH), 10)
                     ctx.vectrex_text_1.scale_rotation(4.0 * ctx.KW, 0)
-            elif self.status == RedcrabLander.GameStatus.GS_INTRO:
+            elif self.status == CaptainLander.GameStatus.GS_INTRO:
                 #  INTRO
                 if self.tic2 == 1:
                     ctx.sound_play_title()
@@ -711,18 +718,18 @@ class RedcrabLander:
                     if self.tic2 >= 350:
                         ctx.vectrex_text_1.draw_text(ctx, self.level_title[self.safe_land],
                                                      ctx.G_WIDTH / 2.0, ((110 + 72) * ctx.KH), 10)
-            elif self.status == RedcrabLander.GameStatus.GS_PAUSE:
+            elif self.status == CaptainLander.GameStatus.GS_PAUSE:
                 #  PAUSE
                 if self.tic % 60 < 30:
                     ctx.vectrex_text_big.scale_rotation(5 * ctx.KW, 0)
                     ctx.vectrex_text_big.draw_text(ctx, "Pause", ctx.G_WIDTH / 2.0, (120 * ctx.KH), 12)
-            elif self.status == RedcrabLander.GameStatus.GS_RUN:
+            elif self.status == CaptainLander.GameStatus.GS_RUN:
                 #  RUNNING
                 if self.ship.fuel <= 0:
                     if self.tic % 30 < 15:
                         ctx.vectrex_text_big.scale_rotation(5 * ctx.KW, 0)
                         ctx.vectrex_text_big.draw_text(ctx, "NO ENERGY !", ctx.G_WIDTH / 2.0, (120 * ctx.KH), 12)
-            elif self.status == RedcrabLander.GameStatus.GS_CRASHED:
+            elif self.status == CaptainLander.GameStatus.GS_CRASHED:
                 #  CRASHED
                 #  "Life request" animation
                 if self.tic2 <= 60:
@@ -756,27 +763,27 @@ class RedcrabLander:
                     ctx.vectrex_text_2.boom = 1
                 ctx.vectrex_text_2.draw_text(ctx, "CRASH!", ctx.G_WIDTH / 2.0, (120.0 * ctx.KH), 14)
                 ctx.vectrex_text_2.boom = 1
-            elif self.status == RedcrabLander.GameStatus.GS_GAME_OVER:
+            elif self.status == CaptainLander.GameStatus.GS_GAME_OVER:
                 #  GAME OVER
                 if self.tic2 < 200:
                     ctx.vectrex_text_2.boom = 10 - (9 / 200.0 * self.tic2)
                     ctx.vectrex_text_2.scale_rotation(5 * ctx.KW * self.tic2 / 60, 0)
                 ctx.vectrex_text_2.draw_text(ctx, "GAME OVER", ctx.G_WIDTH / 2.0, (120 * ctx.KH), 15)
                 ctx.vectrex_text_2.boom = 1
-            elif self.status == RedcrabLander.GameStatus.GS_FINISH:
+            elif self.status == CaptainLander.GameStatus.GS_FINISH:
                 #  FINISH THE GAME
                 if self.tic2 < 200:
                     ctx.vectrex_text_2.boom = 10 - (9 / 200.0 * self.tic2)
                     ctx.vectrex_text_2.scale_rotation(5 * ctx.KW * self.tic2 / 60.0, 0)
                 ctx.vectrex_text_2.draw_text(ctx, "YOU WIN", ctx.G_WIDTH / 2.0, (120.0 * ctx.KH), 15)
                 ctx.vectrex_text_2.boom = 1
-            elif self.status == RedcrabLander.GameStatus.GS_LANDED:
+            elif self.status == CaptainLander.GameStatus.GS_LANDED:
                 #  LANDED
                 if self.tic2 <= 180:
                     ctx.vectrex_text_2.scale_rotation(5 * ctx.KW * self.tic2 / 60.0, self.tic2 * 1.0 / 90 * np.pi)
                 ctx.vectrex_text_2.draw_text(ctx, self.scene.landed_message, ctx.G_WIDTH / 2.0, (120 * ctx.KH), 15)
-            elif self.status == RedcrabLander.GameStatus.GS_EDIT or \
-                    self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:
+            elif self.status == CaptainLander.GameStatus.GS_EDIT or \
+                    self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:
                 # LEVEL editor
                 if ctx.action_key_f1:
                     self.showing_message_editor_help = True
@@ -795,7 +802,7 @@ class RedcrabLander:
                 ctx.draw_box_full(88.0 * ctx.KW, 230.0 * ctx.KH, (88.0 + (self.scene.gravity * 2000.0)) * ctx.KW,
                                   239.0 * ctx.KH, 10)
                 ctx.vectrex_board_text.draw_text(ctx, "LEVEL EDITOR", 246.0 * ctx.KW, 226.0 * ctx.KH, 9)
-                if self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:
+                if self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:
                     if self.tic % 30 < 15:
                         pst = " "
                     else:
@@ -806,7 +813,7 @@ class RedcrabLander:
                 ctx.vectrex_board_text.draw_text(ctx, "X", self.xm * ctx.KW, self.ym * ctx.KH, 10)
 
         def init_level(self, level):
-            self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
+            self.player_action = CaptainLander.PlayerAction.PA_NOTHING
             self.ship.init()
             self.number_of_sucker = 0
             self.sub_level_x = 0
@@ -833,9 +840,9 @@ class RedcrabLander:
             perTicSpeed = 14.0 / ctx.fps
             xs = self.ship.location.x
             ys = self.ship.location.y
-            if self.status == RedcrabLander.GameStatus.GS_RUN:
+            if self.status == CaptainLander.GameStatus.GS_RUN:
                 for i in range(self.number_of_sucker):
-                    if self.sucker[i].status == RedcrabLander.EnergySuckerStatus.SS_NORMAL:
+                    if self.sucker[i].status == CaptainLander.EnergySuckerStatus.SS_NORMAL:
                         xm = self.sucker[i].location.x
                         ym = self.sucker[i].location.y
                         d = ((xs - xm) ** 2 + (ys - ym) ** 2) ** 0.5
@@ -880,25 +887,25 @@ class RedcrabLander:
             self.tic2 += 1
             st = ctx.key_text  # (ctx.anyKey()) ? "+" : "";
             #  Player action
-            self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
+            self.player_action = CaptainLander.PlayerAction.PA_NOTHING
             if ctx.action_rotate_left:
-                self.player_action = RedcrabLander.PlayerAction.PA_LEFT
+                self.player_action = CaptainLander.PlayerAction.PA_LEFT
             if ctx.action_rotate_right:
-                self.player_action = RedcrabLander.PlayerAction.PA_RIGHT
+                self.player_action = CaptainLander.PlayerAction.PA_RIGHT
             if ctx.action_thrust:
-                self.player_action = RedcrabLander.PlayerAction.PA_THRUST
+                self.player_action = CaptainLander.PlayerAction.PA_THRUST
             if ctx.action_pause_resume:
-                self.player_action = RedcrabLander.PlayerAction.PA_PAUSE
+                self.player_action = CaptainLander.PlayerAction.PA_PAUSE
             if ctx.action_quit:
-                self.player_action = RedcrabLander.PlayerAction.PA_QUIT
+                self.player_action = CaptainLander.PlayerAction.PA_QUIT
             # if (UNITY_EDITOR)
             # 'Input.GetKey(KeyCode.F10)'
-            if ctx.action_edit and self.status != RedcrabLander.GameStatus.GS_EDIT and self.tic > 60:
+            if ctx.action_edit and self.status != CaptainLander.GameStatus.GS_EDIT and self.tic > 60:
                 ctx.sound_pause()  # SoundManager.instance.Pause();
-                self.status = RedcrabLander.GameStatus.GS_EDIT
+                self.status = CaptainLander.GameStatus.GS_EDIT
                 self.ship.speed.x = 0
                 self.ship.speed.y = 0
-                self.ship.status = RedcrabLander.LanderStatus.LS_NORMAL
+                self.ship.status = CaptainLander.LanderStatus.LS_NORMAL
                 self.tic = 0
                 self.tic2 = 0
                 self.load_level(self.safe_land, self.sub_level_x, self.sub_level_y)
@@ -912,18 +919,18 @@ class RedcrabLander:
                 self.tic = 0
                 self.life = 0
                 self.tic2 = 0
-                self.status = RedcrabLander.GameStatus.GS_GAME_OVER
+                self.status = CaptainLander.GameStatus.GS_GAME_OVER
             # endif
             # Enemy action
             self.energy_sucker_action(ctx)
 
-            if self.status == RedcrabLander.GameStatus.GS_GAME_OVER or \
-                    self.status == RedcrabLander.GameStatus.GS_FINISH:
+            if self.status == CaptainLander.GameStatus.GS_GAME_OVER or \
+                    self.status == CaptainLander.GameStatus.GS_FINISH:
                 if self.best_score < self.score:
                     self.best_score = self.score
                     self.best_safe_land = self.safe_land
                     try:
-                        fi = open(RedcrabLander.data_path + "LANDER.SCO", "wt")
+                        fi = open(CaptainLander.data_path + "LANDER.SCO", "wt")
                         print(self.best_score, file=fi)
                         print(self.best_safe_land, file=fi)
                         fi.close()
@@ -931,60 +938,60 @@ class RedcrabLander:
                         print(n)  # don"t care :) if the best score failed to be saved
 
             #  Process player action
-            if self.status == RedcrabLander.GameStatus.GS_START:
+            if self.status == CaptainLander.GameStatus.GS_START:
                 self.ship.location.x = self.scene.start_location.x
                 self.ship.location.y = self.scene.start_location.y
                 if ctx.is_any_key_pressed() and self.tic > 30:
-                    self.status = RedcrabLander.GameStatus.GS_RUN
+                    self.status = CaptainLander.GameStatus.GS_RUN
                     self.tic = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_INTRO:
+            if self.status == CaptainLander.GameStatus.GS_INTRO:
                 self.ship.location.x = self.scene.start_location.x
                 self.ship.location.y = self.scene.start_location.y
                 if ctx.is_any_key_pressed() and self.tic > 30:
-                    self.status = RedcrabLander.GameStatus.GS_RUN
+                    self.status = CaptainLander.GameStatus.GS_RUN
                     self.tic = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_LANDED and self.tic > 120:
+            if self.status == CaptainLander.GameStatus.GS_LANDED and self.tic > 120:
                 if self.ship.fuel < 100 and self.tic % 3 == 0:
                     self.ship.fuel += 1
                 if ctx.is_any_key_pressed() or self.ship.location.y > 280 or self.tic > 60 * 10:
                     self.tic = 0
                     self.showing_message_screen = True
-                    self.status = RedcrabLander.GameStatus.GS_START
+                    self.status = CaptainLander.GameStatus.GS_START
                     self.init_level(self.safe_land)
                     self.tic = 0
                     self.tic2 = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_CRASHED and self.tic > 120:
+            if self.status == CaptainLander.GameStatus.GS_CRASHED and self.tic > 120:
                 if ctx.is_any_key_pressed() and self.tic2 > 260 + 180:
-                    self.status = RedcrabLander.GameStatus.GS_START
+                    self.status = CaptainLander.GameStatus.GS_START
                     self.ship.init()
                     self.init_level(self.safe_land)
                     self.tic = 0
                     self.tic2 = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_GAME_OVER and self.tic > 120:
+            if self.status == CaptainLander.GameStatus.GS_GAME_OVER and self.tic > 120:
                 if ctx.is_any_key_pressed() or self.tic > 800:
                     self.init()
                     self.tic = 0
                     self.tic2 = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_FINISH and self.tic > 120:
+            if self.status == CaptainLander.GameStatus.GS_FINISH and self.tic > 120:
                 if ctx.is_any_key_pressed() or self.tic > 800:
                     self.init()
                     self.tic = 0
                     self.tic2 = 0
 
-            if self.status == RedcrabLander.GameStatus.GS_PAUSE and self.tic > 60:
-                if self.player_action == RedcrabLander.PlayerAction.PA_PAUSE:
-                    self.status = RedcrabLander.GameStatus.GS_RUN
-                    self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
+            if self.status == CaptainLander.GameStatus.GS_PAUSE and self.tic > 60:
+                if self.player_action == CaptainLander.PlayerAction.PA_PAUSE:
+                    self.status = CaptainLander.GameStatus.GS_RUN
+                    self.player_action = CaptainLander.PlayerAction.PA_NOTHING
                     self.tic = 0
                     ctx.sound_unpause()
             # if (UNITY_EDITOR)
-            if self.status == RedcrabLander.GameStatus.GS_EDIT or \
-                    self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:
+            if self.status == CaptainLander.GameStatus.GS_EDIT or \
+                    self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:
                 self.bm = 1 if ctx.action_mouse_button1 else 0
                 self.bm += 2 if ctx.action_mouse_button3 else 0
                 self.bm += 4 if ctx.action_mouse_button2 else 0
@@ -1081,7 +1088,7 @@ class RedcrabLander:
                             self.ship.location.x += 320
                 if ctx.action_edit and self.tic > 60:
                     ctx.sound_unpause()
-                    self.status = RedcrabLander.GameStatus.GS_START
+                    self.status = CaptainLander.GameStatus.GS_START
                     self.tic = self.tic2 = 0
                     self.save_level(self.safe_land, self.sub_level_x, self.sub_level_y)
                     self.showing_message_screen = True
@@ -1130,7 +1137,7 @@ class RedcrabLander:
                                     if self.scene.landscape[x_slice].ground > self.scene.landscape[x_slice].sky:
                                         self.scene.landscape[x_slice].ground = self.scene.landscape[x_slice].sky
                             y_start += y_delta
-                if self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:  # change text
+                if self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:  # change text
                     if st != "":
                         isBackSpace = ctx.action_key_backspace
                         isEnter = (st == '\n' or st == '\r')
@@ -1140,11 +1147,11 @@ class RedcrabLander:
                         if isBackSpace:
                             self.level_title[self.safe_land] = self.level_title[self.safe_land][:-1]
                         if isEnter:
-                            self.status = RedcrabLander.GameStatus.GS_EDIT
+                            self.status = CaptainLander.GameStatus.GS_EDIT
                 else:
                     #  SWITCH TO EDIT LEVEL MESSAGE MODE
                     if ctx.action_key_backspace:  # == '\b':
-                        self.status = RedcrabLander.GameStatus.GS_EDIT_TEXT
+                        self.status = CaptainLander.GameStatus.GS_EDIT_TEXT
                     #  INSERT LAND PAD
                     if st == " " and not ctx.action_key_lshift:
                         self.xm = np.clip(self.xm, 10, 309)
@@ -1246,29 +1253,29 @@ class RedcrabLander:
                         if self.scene.gravity > 0:
                             self.scene.gravity -= 0.0025
             # endif
-            if self.status == RedcrabLander.GameStatus.GS_RUN:
+            if self.status == CaptainLander.GameStatus.GS_RUN:
                 if self.ship.fuel <= 0:
                     if self.scene.gravity < 0.0025:
                         self.scene.gravity = 0.0025
-                if self.player_action == RedcrabLander.PlayerAction.PA_PAUSE and self.tic > 30:
-                    self.status = RedcrabLander.GameStatus.GS_PAUSE
-                    self.player_action = RedcrabLander.PlayerAction.PA_NOTHING
+                if self.player_action == CaptainLander.PlayerAction.PA_PAUSE and self.tic > 30:
+                    self.status = CaptainLander.GameStatus.GS_PAUSE
+                    self.player_action = CaptainLander.PlayerAction.PA_NOTHING
                     ctx.sound_pause()
                     self.tic = 0
-                if self.player_action == RedcrabLander.PlayerAction.PA_THRUST:
-                    self.ship.status = RedcrabLander.LanderStatus.LS_THRUST
+                if self.player_action == CaptainLander.PlayerAction.PA_THRUST:
+                    self.ship.status = CaptainLander.LanderStatus.LS_THRUST
                 else:
-                    if self.ship.status != RedcrabLander.LanderStatus.LS_CRASH:
-                        self.ship.status = RedcrabLander.LanderStatus.LS_NORMAL
-                if self.player_action == RedcrabLander.PlayerAction.PA_LEFT and self.ship.fuel > 0:
+                    if self.ship.status != CaptainLander.LanderStatus.LS_CRASH:
+                        self.ship.status = CaptainLander.LanderStatus.LS_NORMAL
+                if self.player_action == CaptainLander.PlayerAction.PA_LEFT and self.ship.fuel > 0:
                     self.ship.angle -= np.pi / 180
-                if self.player_action == RedcrabLander.PlayerAction.PA_RIGHT and self.ship.fuel > 0:
+                if self.player_action == CaptainLander.PlayerAction.PA_RIGHT and self.ship.fuel > 0:
                     self.ship.angle += np.pi / 180
                 if self.ship.angle > np.pi:
                     self.ship.angle -= 2 * np.pi
                 if self.ship.angle < -np.pi:
                     self.ship.angle += 2 * np.pi
-                if self.player_action == RedcrabLander.PlayerAction.PA_THRUST and self.ship.fuel > 0:
+                if self.player_action == CaptainLander.PlayerAction.PA_THRUST and self.ship.fuel > 0:
                     self.ship.speed.x += math.sin(self.ship.angle) * 0.03
                     self.ship.speed.y += math.cos(self.ship.angle) * 0.03
                     if self.tic % 4 == 0:
@@ -1336,15 +1343,15 @@ class RedcrabLander:
                         if self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
-                            self.ship.status = RedcrabLander.LanderStatus.LS_LANDED
+                            self.ship.status = CaptainLander.LanderStatus.LS_LANDED
                             if self.scene.landscape[int(self.ship.location.x)].sky <= 240 or \
                                     self.scene.allow_take_off == 0:
-                                self.ship.status = RedcrabLander.LanderStatus.LS_LANDED_NO_SKY
+                                self.ship.status = CaptainLander.LanderStatus.LS_LANDED_NO_SKY
                             if self.safe_land >= 23:
-                                self.status = RedcrabLander.GameStatus.GS_FINISH
+                                self.status = CaptainLander.GameStatus.GS_FINISH
                             else:
                                 ctx.sound_play_landed()
-                                self.status = RedcrabLander.GameStatus.GS_LANDED
+                                self.status = CaptainLander.GameStatus.GS_LANDED
                             self.tic = 0
                         else:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
@@ -1352,11 +1359,11 @@ class RedcrabLander:
                             self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground \
                                                    + self.ship.size * 0.80
                     else:
-                        self.status = RedcrabLander.GameStatus.GS_CRASHED
-                        self.ship.status = RedcrabLander.LanderStatus.LS_CRASH
+                        self.status = CaptainLander.GameStatus.GS_CRASHED
+                        self.ship.status = CaptainLander.LanderStatus.LS_CRASH
                         ctx.sound_play_explosion()
                         if self.life == 0:
-                            self.status = RedcrabLander.GameStatus.GS_GAME_OVER
+                            self.status = CaptainLander.GameStatus.GS_GAME_OVER
                             ctx.sound_play_game_over()
                         else:
                             self.life -= 1
@@ -1371,7 +1378,7 @@ class RedcrabLander:
                     self.best_score = self.score
                     self.best_safe_land = self.safe_land
                     try:
-                        fi = open(RedcrabLander.data_path + "LANDER.SCO", "wt")
+                        fi = open(CaptainLander.data_path + "LANDER.SCO", "wt")
                         print(self.best_score, file=fi)
                         print(self.best_safe_land, file=fi)
                         fi.close()
@@ -1389,12 +1396,12 @@ class RedcrabLander:
             if sub_level_x <= -100 and sub_level_y <= -100:
                 vv = ".0.0"
             level_name = "l" + str(lvl) + vv + ".lvl"
-            levelFilename = RedcrabLander.data_path + level_name
+            levelFilename = CaptainLander.data_path + level_name
             if os.path.exists(levelFilename):
                 fi = open(levelFilename)
             else:
                 try:
-                    fi = io.TextIOWrapper(zipfile.ZipFile(RedcrabLander.data_archive).open(level_name, "r"),
+                    fi = io.TextIOWrapper(zipfile.ZipFile(CaptainLander.data_archive).open(level_name, "r"),
                                           newline=None)
                 except Exception as ex:
                     print("Can't open level " + level_name)
@@ -1423,8 +1430,8 @@ class RedcrabLander:
             self.scene.fuel_location.y = float(fi.readline())
             #  get gravity
             self.scene.gravity = float(fi.readline())
-            if (sub_level_x <= -100 and sub_level_y <= -100) or self.status == RedcrabLander.GameStatus.GS_EDIT or \
-                    self.status == RedcrabLander.GameStatus.GS_EDIT_TEXT:
+            if (sub_level_x <= -100 and sub_level_y <= -100) or self.status == CaptainLander.GameStatus.GS_EDIT or \
+                    self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:
                 #  get lander location
                 self.ship.location.x = float(fi.readline())
                 self.ship.location.y = float(fi.readline())
@@ -1458,7 +1465,7 @@ class RedcrabLander:
                 vv = ".0.0"
             else:
                 vv = "." + str(sub_level_x) + "." + str(sub_level_y)
-            level_file_name = RedcrabLander.data_path + "l" + str(lvl) + vv + ".lvl"
+            level_file_name = CaptainLander.data_path + "l" + str(lvl) + vv + ".lvl"
             if os.path.exists(level_file_name):
                 old_file_name = level_file_name + ".backup-" + datetime.now().strftime("%Y%m%d%H%M%S")
                 if os.path.exists(old_file_name):
@@ -1557,14 +1564,14 @@ class RedcrabLander:
                      "@8Press Any Key to continue")
             else:
                 file_name = "m" + str(self.safe_land) + ".lvl"
-                messageFilename = RedcrabLander.data_path + file_name
+                messageFilename = CaptainLander.data_path + file_name
                 if os.path.exists(messageFilename):
                     fi = open(messageFilename)
                     m = fi.readlines()
                     fi.close()
                 else:
-                    if os.path.exists(RedcrabLander.data_archive):
-                        zf = zipfile.ZipFile(RedcrabLander.data_archive)
+                    if os.path.exists(CaptainLander.data_archive):
+                        zf = zipfile.ZipFile(CaptainLander.data_archive)
                         try:
                             fi = io.TextIOWrapper(zf.open(file_name, "r"),
                                                   newline=None)
@@ -1630,9 +1637,9 @@ class RedcrabLander:
                 number_character, _ = ctx.vectrex_text_1.draw_text_length(aline)
                 aline = " " + aline + (" " * (lmax - number_character))
                 if self.showing_message_editor_help:
-                    ctx.vectrex_text_small.draw_text_rich(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
+                    ctx.vectrex_text_small.draw_rich_text(ctx, aline, ctx.G_WIDTH / 2.0, (i * 4.5 + 6.0) * ctx.KH, 10)
                 else:
-                    ctx.vectrex_text_1.draw_text_rich(ctx,
+                    ctx.vectrex_text_1.draw_rich_text(ctx,
                                                       aline.rstrip('\n'),
                                                       ctx.G_WIDTH / 2.0,
                                                       ((24 - (limit if limit < m.__len__() else m.__len__()) + i)
@@ -1705,31 +1712,31 @@ class RedcrabLander:
             self.clock = pg.time.Clock()
             self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT))
             pg.display.set_caption('Captain Lander')
-            pg.display.set_icon(pg.image.load(RedcrabLander.data_asset_path + "icon.png"))
+            pg.display.set_icon(pg.image.load(CaptainLander.data_asset_path + "icon.png"))
             self.number_segment_circle = 16
             self.key_text = ""
-            self.vectrex_memory = tuple(RedcrabLander.GameContext.VectrexMemory() for _ in range(10000))
+            self.vectrex_memory = tuple(CaptainLander.GameContext.VectrexMemory() for _ in range(10000))
             self.vectrex_memory_size = 0
-            self.vectrex_text_1 = RedcrabLander.TinyVectrex()
-            self.vectrex_board_text = RedcrabLander.TinyVectrex()
-            self.vectrex_text_2 = RedcrabLander.TinyVectrex()
-            self.vectrex_text_small = RedcrabLander.TinyVectrex()
-            self.vectrex_text_big = RedcrabLander.TinyVectrex()
+            self.vectrex_text_1 = CaptainLander.TinyVectrex()
+            self.vectrex_board_text = CaptainLander.TinyVectrex()
+            self.vectrex_text_2 = CaptainLander.TinyVectrex()
+            self.vectrex_text_small = CaptainLander.TinyVectrex()
+            self.vectrex_text_big = CaptainLander.TinyVectrex()
             self.palette = (
                 pg.Color("black"), pg.Color("blue"), pg.Color("green"), pg.Color("cyan"), pg.Color("red"),
                 pg.Color("magenta"), pg.Color("yellow"), pg.Color("white"),
                 pg.Color("grey"), pg.Color("blue"), pg.Color("green"), pg.Color("cyan"), pg.Color("red"),
                 pg.Color("magenta"), pg.Color("yellow"), pg.Color("white"))
             self.sound = (
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "andrea-baroni.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "game_over.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "thrust.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "explosion.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "landed.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "SE-Gun-001.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "tzing01.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "incoming-transmission.ogg"),
-                pg.mixer.Sound(RedcrabLander.data_asset_path + "modem.ogg")
+                pg.mixer.Sound(CaptainLander.data_asset_path + "andrea-baroni.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "game_over.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "thrust.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "explosion.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "landed.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "SE-Gun-001.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "tzing01.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "incoming-transmission.ogg"),
+                pg.mixer.Sound(CaptainLander.data_asset_path + "modem.ogg")
             )
             self.music_channel = None
             self.KW = self.G_WIDTH / 320.0
@@ -1966,8 +1973,8 @@ class RedcrabLander:
 
     def __init__(self):
         self.run = True
-        self.game = RedcrabLander.Game()
-        self.game_context = RedcrabLander.GameContext()
+        self.game = CaptainLander.Game()
+        self.game_context = CaptainLander.GameContext()
         self.timer = 0.0
         self.game_context.fps = 50
         print("Captain Lander running")
@@ -1987,5 +1994,5 @@ class RedcrabLander:
 
 if __name__ == '__main__':
     print("Get ready")
-    RedcrabLander().play()
+    CaptainLander().play()
     print("Bye bye")
