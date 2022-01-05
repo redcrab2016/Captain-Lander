@@ -23,28 +23,28 @@ import io
 
 
 class CaptainLander:
-    class TV_Polar2D:
-        def __init__(self):
-            self.radius = 0.0
-            self.angle = 0.0
-
-    class TV_vertex2D:
-        def __init__(self):
-            self.x = 0.0
-            self.y = 0.0
-
-    class TV_Glyph:
-        def __init__(self):
-            self.glyph = ""
-
     class TinyVectrex:
+        class TV_Polar2D:
+            def __init__(self):
+                self.radius = 0.0
+                self.angle = 0.0
+
+        class TV_vertex2D:
+            def __init__(self):
+                self.x = 0.0
+                self.y = 0.0
+
+        class TV_Glyph:
+            def __init__(self):
+                self.glyph = ""
+
         def __init__(self):
-            self.plot = tuple(CaptainLander.TV_Polar2D() for _ in range(18))
-            self.plotxy = tuple(CaptainLander.TV_vertex2D() for _ in range(18))
+            self.plot = tuple(CaptainLander.TinyVectrex.TV_Polar2D() for _ in range(18))
+            self.plotxy = tuple(CaptainLander.TinyVectrex.TV_vertex2D() for _ in range(18))
             self.size = 0.0
             self.angle = 0.0
             self.cx = 0
-            self.alphabet = tuple(CaptainLander.TV_Glyph() for _ in range(356))
+            self.alphabet = tuple(CaptainLander.TinyVectrex.TV_Glyph() for _ in range(356))
             self.boom = 1.0
             self.__grid_factor = (((2 ** .5) / 2) ** 0,
                                   ((2 ** .5) / 2) ** 1,
@@ -307,7 +307,7 @@ class CaptainLander:
             self.LANDER_LANDED = "$F2HCBDFEH"
             self.LANDER_THRUST = "$E2E0D2C$$ $F2HCBDFEH"
             self.model = CaptainLander.TinyVectrex()
-            self.location = CaptainLander.Vertex2D()
+            self.spot = CaptainLander.Vertex2D()
             self.speed = CaptainLander.Vertex2D()
             self.fuel = 0.0
             self.angle = 0.0
@@ -317,12 +317,12 @@ class CaptainLander:
             self.noise_tic = 0
             self.tic = 0
             self.init()
-            self.location.x = x
-            self.location.y = y
+            self.spot.x = x
+            self.spot.y = y
 
         def init(self):
-            self.location.x = 160
-            self.location.y = 230
+            self.spot.x = 160
+            self.spot.y = 230
             self.fuel = 100
             self.angle = 0
             self.size = 7
@@ -338,50 +338,50 @@ class CaptainLander:
             if self.status == CaptainLander.LanderStatus.LS_NORMAL:
                 self.crash_tic = 0
                 self.model.boom = 1
-                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                      ((240 - self.location.y) * ctx.KH), 10)
+                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.spot.x * ctx.KW),
+                                      ((240 - self.spot.y) * ctx.KH), 10)
                 if self.fuel <= 0:
-                    ctx.vectrex_text_small.draw_text(ctx, "I'M CRASHING!", (self.location.x * ctx.KW),
-                                                     ((240 - self.location.y - self.size - 7) * ctx.KH), 15)
+                    ctx.vectrex_text_small.draw_text(ctx, "I'M CRASHING!", (self.spot.x * ctx.KW),
+                                                     ((240 - self.spot.y - self.size - 7) * ctx.KH), 15)
             elif self.status == CaptainLander.LanderStatus.LS_LANDED or \
                     self.status == CaptainLander.LanderStatus.LS_LANDED_NO_SKY:
                 self.crash_tic = 0
                 self.model.boom = 1
-                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                      ((240 - self.location.y) * ctx.KH), 10)
-                ctx.draw_circle(self.location.x * ctx.KW, (240 - self.location.y) * ctx.KH,
+                self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.spot.x * ctx.KW),
+                                      ((240 - self.spot.y) * ctx.KH), 10)
+                ctx.draw_circle(self.spot.x * ctx.KW, (240 - self.spot.y) * ctx.KH,
                                 (self.size + 5 + 3 * math.sin(self.tic / 10.0)) * ctx.KW, 8)
                 if 70 <= self.fuel <= 99:
                     if self.status == CaptainLander.LanderStatus.LS_LANDED:
                         ctx.vectrex_text_small.draw_text(ctx, "Launch To " +
                                                          str(int(3 - ((self.fuel - 70.0) / 30 * 4))),
-                                                         (self.location.x * ctx.KW),
-                                                         ((240 - self.location.y - self.size - 7) * ctx.KH), 15)
+                                                         (self.spot.x * ctx.KW),
+                                                         ((240 - self.spot.y - self.size - 7) * ctx.KH), 15)
                     else:
-                        ctx.vectrex_text_small.draw_text(ctx, "I'm Ready !", (self.location.x * ctx.KW),
-                                                         ((240 - self.location.y - self.size - 7) * ctx.KH), 15)
-                if self.fuel >= 100 and self.location.y < 300 and self.status == CaptainLander.LanderStatus.LS_LANDED:
+                        ctx.vectrex_text_small.draw_text(ctx, "I'm Ready !", (self.spot.x * ctx.KW),
+                                                         ((240 - self.spot.y - self.size - 7) * ctx.KH), 15)
+                if self.fuel >= 100 and self.spot.y < 300 and self.status == CaptainLander.LanderStatus.LS_LANDED:
                     self.angle = 0
-                    self.location.y *= 1.01
+                    self.spot.y *= 1.01
 
             if self.status == CaptainLander.LanderStatus.LS_CRASH:
                 self.crash_tic += 1
 
                 if self.crash_tic < 60:
                     self.model.boom = 1 - self.crash_tic / 15.0
-                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                          ((240 - self.location.y) * ctx.KH), 10)
+                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.spot.x * ctx.KW),
+                                          ((240 - self.spot.y) * ctx.KH), 10)
             if self.status == CaptainLander.LanderStatus.LS_THRUST:
                 self.noise_tic = 0
 
                 if self.tic % 20 < self.fuel / 5 and self.fuel > 0:
-                    self.model.draw_glyph(ctx, self.LANDER_THRUST, (self.location.x * ctx.KW),
-                                          ((240 - self.location.y) * ctx.KH), 10)
+                    self.model.draw_glyph(ctx, self.LANDER_THRUST, (self.spot.x * ctx.KW),
+                                          ((240 - self.spot.y) * ctx.KH), 10)
                     if self.tic % 3 == 0:
                         ctx.sound_play_thrust()  # SoundManager.instance.NoiseStart();
                 else:
-                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.location.x * ctx.KW),
-                                          ((240 - self.location.y) * ctx.KH), 10)
+                    self.model.draw_glyph(ctx, self.LANDER_NORMAL, (self.spot.x * ctx.KW),
+                                          ((240 - self.spot.y) * ctx.KH), 10)
             if self.status != CaptainLander.LanderStatus.LS_THRUST:
                 self.noise_tic += 1
                 #  if (self.noise_tic>5) SoundManager.instance.NoiseStop();
@@ -390,7 +390,7 @@ class CaptainLander:
         def __init__(self):
             self.EnergySucker_NORMAL = "$C0H3I0B3C0D3E0F3G0H $E3I0I 3C0C 3E0E 3G0G"
             self.model = CaptainLander.TinyVectrex()
-            self.location = CaptainLander.Vertex2D()
+            self.spot = CaptainLander.Vertex2D()
             self.speed = CaptainLander.Vertex2D()
             self.angle = 0.0
             self.size = 0.0
@@ -402,23 +402,23 @@ class CaptainLander:
             self.tic += 1
             if self.status == CaptainLander.EnergySuckerStatus.SS_NORMAL:
                 self.model.scale_rotation(self.size * ctx.KW, self.tic * np.pi / 90.0)
-                self.model.draw_glyph(ctx, self.EnergySucker_NORMAL, (self.location.x * ctx.KW),
-                                      ((240 - self.location.y) * ctx.KH), 10)
+                self.model.draw_glyph(ctx, self.EnergySucker_NORMAL, (self.spot.x * ctx.KW),
+                                      ((240 - self.spot.y) * ctx.KH), 10)
             elif self.status == CaptainLander.EnergySuckerStatus.SS_EXPLODED:
                 pass  # future evolution : when energy sucker are destroyable
 
         def init(self, x=0, y=0):
             self.tic = 0
             self.status = CaptainLander.EnergySuckerStatus.SS_NORMAL
-            self.location.x = 0
-            self.location.y = 0
+            self.spot.x = 0
+            self.spot.y = 0
             self.speed.x = 0
             self.speed.y = 0
             self.angle = 0
             self.size = 7
             self.model.boom = 1
-            self.location.x = x
-            self.location.y = y
+            self.spot.x = x
+            self.spot.y = y
 
     class Scene:
         class Landscape:
@@ -427,11 +427,11 @@ class CaptainLander:
                 self.sky = 0
 
         def __init__(self):
-            self.landscape = tuple(CaptainLander.Scene.Landscape() for _ in range(320))
-            self.pad_location = CaptainLander.Vertex2D()
-            self.fuel_location = CaptainLander.Vertex2D()
+            self.space = tuple(CaptainLander.Scene.Landscape() for _ in range(320))
+            self.pad_spot = CaptainLander.Vertex2D()
+            self.fuel_spot = CaptainLander.Vertex2D()
             self.gravity = 0.0
-            self.start_location = CaptainLander.Vertex2D()
+            self.start_spot = CaptainLander.Vertex2D()
             self.inverse = 0
             self.tic = 0
             self.go_up = 0
@@ -444,26 +444,26 @@ class CaptainLander:
 
         def draw(self, ctx):
             self.tic += 1
-            for i in range(self.landscape.__len__() - 1):
-                if self.landscape[i].ground != self.landscape[i].sky or \
-                        self.landscape[i + 1].ground != self.landscape[i + 1].sky:
-                    if self.landscape[i].ground >= 20 and self.landscape[i + 1].ground >= 20:
-                        ctx.draw_line(i * ctx.KW, (240 - int(self.landscape[i].ground)) * ctx.KH, (i + 1) * ctx.KW,
-                                      (240 - int(self.landscape[i + 1].ground)) * ctx.KH, 13)
-                    ctx.draw_line(i * ctx.KW, (240 - int(self.landscape[i].sky)) * ctx.KH, (i + 1) * ctx.KW,
-                                  (240 - int(self.landscape[i + 1].sky)) * ctx.KH, 13)
-            ctx.draw_box_full(int(self.pad_location.x - 10) * ctx.KW, (240 - int(self.pad_location.y)) * ctx.KH,
-                              int(self.pad_location.x + 10) * ctx.KW, (245 - int(self.pad_location.y)) * ctx.KH, 11)
-            ctx.vectrex_text_small.draw_text(ctx, "Target", ((self.pad_location.x + 1) * ctx.KW),
-                                             ((240 - self.pad_location.y + 8) * ctx.KH), 11)
-            ctx.draw_box_full(int(self.fuel_location.x - 10) * ctx.KW, (240 - int(self.fuel_location.y)) * ctx.KH,
-                              int(self.fuel_location.x + 10) * ctx.KW, (245 - int(self.fuel_location.y)) * ctx.KH, 11)
+            for i in range(self.space.__len__() - 1):
+                if self.space[i].ground != self.space[i].sky or self.space[i + 1].ground != self.space[i + 1].sky:
+                    if self.space[i].ground >= 20 and self.space[i + 1].ground >= 20:
+                        ctx.draw_line(i * ctx.KW, (240 - int(self.space[i].ground)) * ctx.KH,
+                                      (i + 1) * ctx.KW, (240 - int(self.space[i + 1].ground)) * ctx.KH, 13)
+                    ctx.draw_line(i * ctx.KW, (240 - int(self.space[i].sky)) * ctx.KH,
+                                  (i + 1) * ctx.KW, (240 - int(self.space[i + 1].sky)) * ctx.KH, 13)
+            ctx.draw_box_full(int(self.pad_spot.x - 10) * ctx.KW, (240 - int(self.pad_spot.y)) * ctx.KH,
+                              int(self.pad_spot.x + 10) * ctx.KW, (245 - int(self.pad_spot.y)) * ctx.KH, 11)
+            ctx.vectrex_text_small.draw_text(ctx, "Target", ((self.pad_spot.x + 1) * ctx.KW),
+                                             ((240 - self.pad_spot.y + 8) * ctx.KH), 11)
+            ctx.draw_box_full(int(self.fuel_spot.x - 10) * ctx.KW, (240 - int(self.fuel_spot.y)) * ctx.KH,
+                              int(self.fuel_spot.x + 10) * ctx.KW, (245 - int(self.fuel_spot.y)) * ctx.KH, 11)
             if self.tic % 240 < 120:
                 energy = "Energy"
             else:
                 energy = "Reload"
-            ctx.vectrex_text_small.draw_text(ctx, energy, ((self.fuel_location.x + 1) * ctx.KW),
-                                             ((240 - self.fuel_location.y + 8) * ctx.KH), 11)
+            ctx.vectrex_text_small.draw_text(ctx, energy,
+                                             ((self.fuel_spot.x + 1) * ctx.KW),
+                                             ((240 - self.fuel_spot.y + 8) * ctx.KH), 11)
 
         def init(self, global_level=0):
             self.tic = 0
@@ -478,53 +478,53 @@ class CaptainLander:
             if global_level <= 0:
                 global_level = 1
             level = global_level % 10
-            ub = self.landscape.__len__() - 1
-            self.start_location.x = 160
-            self.start_location.y = 230
+            ub = self.space.__len__() - 1
+            self.start_spot.x = 160
+            self.start_spot.y = 230
             prev = np.random.rand() * 200 + 20
-            for land_slice in self.landscape:
+            for land_slice in self.space:
                 land_slice.sky = 250
                 land_slice.ground = prev
             for j in range(1, 7):
                 slope = np.random.rand() * (level + 1) * 250 / j - ((level + 1) * 250 / 2 / j)
                 cnt = 0
                 for i in range(ub + 1):
-                    cur = self.landscape[i].ground + slope * cnt
-                    self.landscape[i].ground = cur
+                    cur = self.space[i].ground + slope * cnt
+                    self.space[i].ground = cur
                     cnt += 1
                     if cnt > 320 / 2 ** j:
                         slope = np.random.rand() * (level + 1) * 250 / j - ((level + 1) * 250 / 2 / j)
                         cnt = 0
                         if i < ub:
-                            delta = cur - self.landscape[i + 1].ground
+                            delta = cur - self.space[i + 1].ground
                         else:
                             delta = 0
                         for k in range(i + 1, ub + 1):
-                            self.landscape[k].ground += delta
+                            self.space[k].ground += delta
             delta = 0
             mini = 1000
             maxi = 0
-            for land_slice in self.landscape:
+            for land_slice in self.space:
                 mini = land_slice.ground if (land_slice.ground < mini) else mini
                 maxi = land_slice.ground if (land_slice.ground > maxi) else maxi
                 delta += land_slice.ground
             ground = (maxi - mini) / 5 * (1 if level == 0 else level)
             mini = maxi - ground
-            for land_slice in self.landscape:
+            for land_slice in self.space:
                 land_slice.ground = mini if (land_slice.ground < mini) else land_slice.ground
                 land_slice.ground = (land_slice.ground - mini) / (maxi - mini) * (level / 8.0) * 200 + 20
                 land_slice.ground = float(np.clip(land_slice.ground, 20.0, 220.0))
 
-            self.fuel_location.x = -100.0
-            self.fuel_location.y = -100
-            self.pad_location.x = (int(np.random.rand() * 2) * 300 - 150) * (level / 10.0) + 160
-            self.pad_location.y = (self.landscape[int(self.pad_location.x) - 10].ground +
-                                   self.landscape[int(self.pad_location.x) + 10].ground) / 2
-            self.pad_location.y = 20 if (self.pad_location.y < 20) else self.pad_location.y
-            lb = int(self.pad_location.x) - 10
-            ub = int(self.pad_location.x) + 10
+            self.fuel_spot.x = -100.0
+            self.fuel_spot.y = -100
+            self.pad_spot.x = (int(np.random.rand() * 2) * 300 - 150) * (level / 10.0) + 160
+            self.pad_spot.y = \
+                (self.space[int(self.pad_spot.x) - 10].ground + self.space[int(self.pad_spot.x) + 10].ground) / 2
+            self.pad_spot.y = 20 if (self.pad_spot.y < 20) else self.pad_spot.y
+            lb = int(self.pad_spot.x) - 10
+            ub = int(self.pad_spot.x) + 10
             for i in range(lb, ub + 1):
-                self.landscape[i].ground = self.pad_location.y
+                self.space[i].ground = self.pad_spot.y
 
     class Game:
         def __init__(self):
@@ -627,9 +627,9 @@ class CaptainLander:
                     self.status != CaptainLander.GameStatus.GS_EDIT_TEXT:
                 aLife.size = 5
                 aLife.status = CaptainLander.LanderStatus.LS_NORMAL
-                aLife.location.y = 6
+                aLife.spot.y = 6
                 for i in range(1, self.life + 1):
-                    aLife.location.x = 88 + 25 + (i - 1) * 12
+                    aLife.spot.x = 88 + 25 + (i - 1) * 12
                     aLife.angle = self.tic * np.pi / 180
                     aLife.draw(ctx)
 
@@ -733,25 +733,25 @@ class CaptainLander:
                 #  CRASHED
                 #  "Life request" animation
                 if self.tic2 <= 60:
-                    aLife.location.x = 88 + 25 + self.life * 12
+                    aLife.spot.x = 88 + 25 + self.life * 12
                     aLife.angle = self.tic * np.pi / 180
                     aLife.draw(ctx)
                 if self.tic2 == 60:
                     self.load_level(self.safe_land, 0, 0)
                 if self.tic2 > 60:
-                    destination_x = self.scene.start_location.x
-                    destination_y = self.scene.start_location.y
+                    destination_x = self.scene.start_spot.x
+                    destination_y = self.scene.start_spot.y
                     if self.tic2 < 60 + 200:
-                        aLife.location.x = (destination_x - (88 + 25 + self.life * 12)) / 200.0 * (
+                        aLife.spot.x = (destination_x - (88 + 25 + self.life * 12)) / 200.0 * (
                                 self.tic2 - 60) + 88 + 25 + self.life * 12
-                        aLife.location.y = (destination_y - 6.0) / 200.0 * (self.tic2 - 60) + 6
+                        aLife.spot.y = (destination_y - 6.0) / 200.0 * (self.tic2 - 60) + 6
                         aLife.size = (7.0 - 5.0) / 200.0 * (self.tic2 - 60) + 5
                         aLife.angle = self.tic * np.pi / 180
                     else:
                         ctx.vectrex_text_small.draw_text(ctx, "I'm Ready", (destination_x * ctx.KW),
                                                          (((240.0 - destination_y) + 7 + 4) * ctx.KW), 15)
-                        aLife.location.x = destination_x
-                        aLife.location.y = destination_y
+                        aLife.spot.x = destination_x
+                        aLife.spot.y = destination_y
                         aLife.size = 7
                         aLife.angle = self.tic * np.pi / 180
                     aLife.draw(ctx)
@@ -826,28 +826,28 @@ class CaptainLander:
                     self.number_of_sucker = self.sucker.__len__() \
                         if (self.number_of_sucker > self.sucker.__len__()) else self.number_of_sucker
                     for i in range(self.number_of_sucker):
-                        self.sucker[i].location.x = 160 + 160 - self.scene.pad_location.x + np.random.rand() * 30 - 15
-                        if abs(self.sucker[i].location.x - self.scene.pad_location.x) < 100:
-                            self.sucker[i].location.x *= 2.0
-                            self.sucker[i].location.x = 319 if (self.sucker[i].location.x > 319) else self.sucker[
-                                i].location.x
-                        self.sucker[i].location.y = self.scene.landscape[int(self.sucker[i].location.x)].ground + 20 + (
-                                220 - self.scene.landscape[int(self.sucker[i].location.x)].ground) * np.random.rand()
-            self.ship.location.x = self.scene.start_location.x
-            self.ship.location.y = self.scene.start_location.y
+                        self.sucker[i].spot.x = 160 + 160 - self.scene.pad_spot.x + np.random.rand() * 30 - 15
+                        if abs(self.sucker[i].spot.x - self.scene.pad_spot.x) < 100:
+                            self.sucker[i].spot.x *= 2.0
+                            self.sucker[i].spot.x = 319 if (self.sucker[i].spot.x > 319) else self.sucker[
+                                i].spot.x
+                        self.sucker[i].spot.y = self.scene.space[int(self.sucker[i].spot.x)].ground + 20 + (
+                                220 - self.scene.space[int(self.sucker[i].spot.x)].ground) * np.random.rand()
+            self.ship.spot.x = self.scene.start_spot.x
+            self.ship.spot.y = self.scene.start_spot.y
 
         def energy_sucker_action(self, ctx):
             perTicSpeed = 14.0 / ctx.fps
-            xs = self.ship.location.x
-            ys = self.ship.location.y
+            xs = self.ship.spot.x
+            ys = self.ship.spot.y
             if self.status == CaptainLander.GameStatus.GS_RUN:
                 for i in range(self.number_of_sucker):
                     if self.sucker[i].status == CaptainLander.EnergySuckerStatus.SS_NORMAL:
-                        xm = self.sucker[i].location.x
-                        ym = self.sucker[i].location.y
-                        d = ((xs - xm) ** 2 + (ys - ym) ** 2) ** 0.5
+                        xm = self.sucker[i].spot.x
+                        ym = self.sucker[i].spot.y
                         dx = xs - xm
                         dy = ys - ym
+                        d = (dx ** 2 + dy ** 2) ** 0.5
                         k = perTicSpeed / d
                         # detect collision to ship, if so then still ship energy
                         if d < self.ship.size + self.sucker[i].size:
@@ -860,8 +860,8 @@ class CaptainLander:
                         ym += self.sucker[i].speed.y
                         xm = 319 if (xm > 319) else xm
                         xm = 0 if (xm < 0) else xm
-                        new_alt = ym - self.scene.landscape[int(xm)].ground
-                        new_sky_dist = self.scene.landscape[int(xm)].sky - ym
+                        new_alt = ym - self.scene.space[int(xm)].ground
+                        new_sky_dist = self.scene.space[int(xm)].sky - ym
                         # ground detection
                         if (0 <= new_alt <= 10) or (0 <= new_sky_dist <= 10):
                             self.sucker[i].speed.y = 0
@@ -879,8 +879,8 @@ class CaptainLander:
                                 self.sucker[i].speed.y = -perTicSpeed
                                 self.sucker[i].speed.x = 0
 
-                        self.sucker[i].location.x += self.sucker[i].speed.x
-                        self.sucker[i].location.y += self.sucker[i].speed.y
+                        self.sucker[i].spot.x += self.sucker[i].speed.x
+                        self.sucker[i].spot.y += self.sucker[i].speed.y
 
         def tick(self, ctx):
             self.tic += 1
@@ -939,15 +939,15 @@ class CaptainLander:
 
             #  Process player action
             if self.status == CaptainLander.GameStatus.GS_START:
-                self.ship.location.x = self.scene.start_location.x
-                self.ship.location.y = self.scene.start_location.y
+                self.ship.spot.x = self.scene.start_spot.x
+                self.ship.spot.y = self.scene.start_spot.y
                 if ctx.is_any_key_pressed() and self.tic > 30:
                     self.status = CaptainLander.GameStatus.GS_RUN
                     self.tic = 0
 
             if self.status == CaptainLander.GameStatus.GS_INTRO:
-                self.ship.location.x = self.scene.start_location.x
-                self.ship.location.y = self.scene.start_location.y
+                self.ship.spot.x = self.scene.start_spot.x
+                self.ship.spot.y = self.scene.start_spot.y
                 if ctx.is_any_key_pressed() and self.tic > 30:
                     self.status = CaptainLander.GameStatus.GS_RUN
                     self.tic = 0
@@ -955,7 +955,7 @@ class CaptainLander:
             if self.status == CaptainLander.GameStatus.GS_LANDED and self.tic > 120:
                 if self.ship.fuel < 100 and self.tic % 3 == 0:
                     self.ship.fuel += 1
-                if ctx.is_any_key_pressed() or self.ship.location.y > 280 or self.tic > 60 * 10:
+                if ctx.is_any_key_pressed() or self.ship.spot.y > 280 or self.tic > 60 * 10:
                     self.tic = 0
                     self.showing_message_screen = True
                     self.status = CaptainLander.GameStatus.GS_START
@@ -999,19 +999,19 @@ class CaptainLander:
                 self.ym = ctx.action_mouse_position_y / ctx.KH * 1.0
                 self.xrm = ctx.action_mouse_rel_x / ctx.KW * 1.0
                 self.yrm = ctx.action_mouse_rel_y / ctx.KH * 1.0
-                self.scene.start_location.x = self.ship.location.x
-                self.scene.start_location.y = self.ship.location.y
+                self.scene.start_spot.x = self.ship.spot.x
+                self.scene.start_spot.y = self.ship.spot.y
 
                 if not ctx.action_key_ctrl:
                     if not ctx.action_key_shift:
                         if ctx.action_key_up_arrow:
-                            self.ship.location.y += 1.0
+                            self.ship.spot.y += 1.0
                         if ctx.action_key_down_arrow:
-                            self.ship.location.y -= 1.0
+                            self.ship.spot.y -= 1.0
                         if ctx.action_key_left_arrow:
-                            self.ship.location.x -= 1.0
+                            self.ship.spot.x -= 1.0
                         if ctx.action_key_rightarrow:
-                            self.ship.location.x += 1.0
+                            self.ship.spot.x += 1.0
                     else:
                         if ctx.action_key_left_arrow:
                             self.ship.angle -= np.pi / 100.0
@@ -1023,69 +1023,69 @@ class CaptainLander:
                                 self.ship.angle -= 2.0 * np.pi
                 else:
                     if ctx.action_key_up_arrow:
-                        for land_slice in self.scene.landscape:
+                        for land_slice in self.scene.space:
                             land_slice.ground += 1
                             land_slice.sky += 1
                         for sucker in self.sucker:
-                            sucker.location.y += 1
-                        self.scene.pad_location.y += 1
-                        self.scene.fuel_location.y += 1
-                        self.ship.location.y += 1
+                            sucker.spot.y += 1
+                        self.scene.pad_spot.y += 1
+                        self.scene.fuel_spot.y += 1
+                        self.ship.spot.y += 1
                     if ctx.action_key_down_arrow:
-                        for land_slice in self.scene.landscape:
+                        for land_slice in self.scene.space:
                             land_slice.ground -= 1
                             land_slice.sky -= 1
                         for i in range(self.sucker.__len__()):
-                            self.sucker[i].location.y -= 1
-                        self.scene.pad_location.y -= 1
-                        self.scene.fuel_location.y -= 1
-                        self.ship.location.y -= 1
+                            self.sucker[i].spot.y -= 1
+                        self.scene.pad_spot.y -= 1
+                        self.scene.fuel_spot.y -= 1
+                        self.ship.spot.y -= 1
                     if ctx.action_key_left_arrow:
-                        tg = self.scene.landscape[-1].ground
-                        ts = self.scene.landscape[-1].sky
-                        for i in range(self.scene.landscape.__len__() - 1, 0, -1):
-                            self.scene.landscape[i].ground = self.scene.landscape[i - 1].ground
-                            self.scene.landscape[i].sky = self.scene.landscape[i - 1].sky
-                        self.scene.landscape[0].ground = tg
-                        self.scene.landscape[0].sky = ts
+                        tg = self.scene.space[-1].ground
+                        ts = self.scene.space[-1].sky
+                        for i in range(self.scene.space.__len__() - 1, 0, -1):
+                            self.scene.space[i].ground = self.scene.space[i - 1].ground
+                            self.scene.space[i].sky = self.scene.space[i - 1].sky
+                        self.scene.space[0].ground = tg
+                        self.scene.space[0].sky = ts
                         for sucker in self.sucker:
-                            sucker.location.x += 1
-                            if sucker.location.x >= 320:
-                                sucker.location.x -= 320
-                        if self.scene.pad_location.x > -100:
-                            self.scene.pad_location.x += 1
-                            if self.scene.pad_location.x >= 320:
-                                self.scene.pad_location.x -= 320
-                        if self.scene.fuel_location.x > -100:
-                            self.scene.fuel_location.x += 1
-                            if self.scene.fuel_location.x >= 320:
-                                self.scene.fuel_location.x -= 320
-                        self.ship.location.x += 1
-                        if self.ship.location.x >= 320:
-                            self.ship.location.x -= 320
+                            sucker.spot.x += 1
+                            if sucker.spot.x >= 320:
+                                sucker.spot.x -= 320
+                        if self.scene.pad_spot.x > -100:
+                            self.scene.pad_spot.x += 1
+                            if self.scene.pad_spot.x >= 320:
+                                self.scene.pad_spot.x -= 320
+                        if self.scene.fuel_spot.x > -100:
+                            self.scene.fuel_spot.x += 1
+                            if self.scene.fuel_spot.x >= 320:
+                                self.scene.fuel_spot.x -= 320
+                        self.ship.spot.x += 1
+                        if self.ship.spot.x >= 320:
+                            self.ship.spot.x -= 320
                     if ctx.action_key_rightarrow:
-                        tg = self.scene.landscape[0].ground
-                        ts = self.scene.landscape[0].sky
-                        for i in range(self.scene.landscape.__len__() - 1):
-                            self.scene.landscape[i].ground = self.scene.landscape[i + 1].ground
-                            self.scene.landscape[i].sky = self.scene.landscape[i + 1].sky
-                        self.scene.landscape[-1].ground = tg
-                        self.scene.landscape[-1].sky = ts
+                        tg = self.scene.space[0].ground
+                        ts = self.scene.space[0].sky
+                        for i in range(self.scene.space.__len__() - 1):
+                            self.scene.space[i].ground = self.scene.space[i + 1].ground
+                            self.scene.space[i].sky = self.scene.space[i + 1].sky
+                        self.scene.space[-1].ground = tg
+                        self.scene.space[-1].sky = ts
                         for sucker in self.sucker:
-                            sucker.location.x -= 1
-                            if sucker.location.x < 0:
-                                sucker.location.x += 320
-                        if self.scene.pad_location.x > -100:
-                            self.scene.pad_location.x -= 1
-                            if self.scene.pad_location.x < 0:
-                                self.scene.pad_location.x += 320
-                        if self.scene.fuel_location.x > -100:
-                            self.scene.fuel_location.x -= 1
-                            if self.scene.fuel_location.x < 0:
-                                self.scene.fuel_location.x += 320
-                        self.ship.location.x -= 1
-                        if self.ship.location.x < 0:
-                            self.ship.location.x += 320
+                            sucker.spot.x -= 1
+                            if sucker.spot.x < 0:
+                                sucker.spot.x += 320
+                        if self.scene.pad_spot.x > -100:
+                            self.scene.pad_spot.x -= 1
+                            if self.scene.pad_spot.x < 0:
+                                self.scene.pad_spot.x += 320
+                        if self.scene.fuel_spot.x > -100:
+                            self.scene.fuel_spot.x -= 1
+                            if self.scene.fuel_spot.x < 0:
+                                self.scene.fuel_spot.x += 320
+                        self.ship.spot.x -= 1
+                        if self.ship.spot.x < 0:
+                            self.ship.spot.x += 320
                 if ctx.action_edit and self.tic > 60:
                     ctx.sound_unpause()
                     self.status = CaptainLander.GameStatus.GS_START
@@ -1119,23 +1119,22 @@ class CaptainLander:
 
                         for x_slice in range(x_start, x_end + 1):
                             if 0 <= x_slice < 320:
-
                                 if self.bm == 1:
-                                    self.scene.landscape[x_slice].ground = int(240 - y_start)
-                                    if self.scene.landscape[x_slice].ground < 20:
-                                        self.scene.landscape[x_slice].ground = -20
-                                    if self.scene.landscape[x_slice].ground > 220:
-                                        self.scene.landscape[x_slice].ground = 220
-                                    if self.scene.landscape[x_slice].ground > self.scene.landscape[x_slice].sky:
-                                        self.scene.landscape[x_slice].sky = self.scene.landscape[x_slice].ground
+                                    self.scene.space[x_slice].ground = int(240 - y_start)
+                                    if self.scene.space[x_slice].ground < 20:
+                                        self.scene.space[x_slice].ground = -20
+                                    if self.scene.space[x_slice].ground > 220:
+                                        self.scene.space[x_slice].ground = 220
+                                    if self.scene.space[x_slice].ground > self.scene.space[x_slice].sky:
+                                        self.scene.space[x_slice].sky = self.scene.space[x_slice].ground
                                 else:  # bm == 2
-                                    self.scene.landscape[x_slice].sky = int(240 - y_start)
-                                    if self.scene.landscape[x_slice].sky < 20:
-                                        self.scene.landscape[x_slice].sky = 20
-                                    if self.scene.landscape[x_slice].sky > 220:
-                                        self.scene.landscape[x_slice].sky = 250
-                                    if self.scene.landscape[x_slice].ground > self.scene.landscape[x_slice].sky:
-                                        self.scene.landscape[x_slice].ground = self.scene.landscape[x_slice].sky
+                                    self.scene.space[x_slice].sky = int(240 - y_start)
+                                    if self.scene.space[x_slice].sky < 20:
+                                        self.scene.space[x_slice].sky = 20
+                                    if self.scene.space[x_slice].sky > 220:
+                                        self.scene.space[x_slice].sky = 250
+                                    if self.scene.space[x_slice].ground > self.scene.space[x_slice].sky:
+                                        self.scene.space[x_slice].ground = self.scene.space[x_slice].sky
                             y_start += y_delta
                 if self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:  # change text
                     if st != "":
@@ -1150,22 +1149,22 @@ class CaptainLander:
                             self.status = CaptainLander.GameStatus.GS_EDIT
                 else:
                     #  SWITCH TO EDIT LEVEL MESSAGE MODE
-                    if ctx.action_key_backspace:  # == '\b':
+                    if ctx.action_key_backspace:
                         self.status = CaptainLander.GameStatus.GS_EDIT_TEXT
                     #  INSERT LAND PAD
                     if st == " " and not ctx.action_key_lshift:
                         self.xm = np.clip(self.xm, 10, 309)
-                        self.scene.pad_location.x = self.xm
-                        self.scene.pad_location.y = 240 - self.ym
+                        self.scene.pad_spot.x = self.xm
+                        self.scene.pad_spot.y = 240 - self.ym
                         for i in range(int(self.xm - 10), int(self.xm + 11)):
-                            self.scene.landscape[i].ground = self.scene.pad_location.y
+                            self.scene.space[i].ground = self.scene.pad_spot.y
                     #  INSERT FUEL PAD
                     if st == " " and ctx.action_key_lshift:
                         self.xm = np.clip(self.xm, 10, 309)
-                        self.scene.fuel_location.x = self.xm
-                        self.scene.fuel_location.y = 240 - self.ym
+                        self.scene.fuel_spot.x = self.xm
+                        self.scene.fuel_spot.y = 240 - self.ym
                         for i in range(int(self.xm - 10), int(self.xm + 11)):
-                            self.scene.landscape[i].ground = self.scene.fuel_location.y
+                            self.scene.space[i].ground = self.scene.fuel_spot.y
                     #  ENABLE/DISABLE UP/DOWN/LEFT/RIGHT PASS
                     if st == "t":
                         self.scene.go_up = 1 if self.scene.go_up == 0 else 0
@@ -1211,10 +1210,10 @@ class CaptainLander:
                         self.tic = 0
                     #  REMOVE LAND PAD
                     if ctx.action_key_f6:
-                        self.scene.pad_location.x = -100
+                        self.scene.pad_spot.x = -100
                     #  REMOVE FUEL PAD
                     if ctx.action_key_f7:
-                        self.scene.fuel_location.x = -100
+                        self.scene.fuel_spot.x = -100
                     #  GENERATE LEVEL
                     if self.tic > 3 and ctx.action_key_f4:
                         self.tic = 0
@@ -1223,8 +1222,8 @@ class CaptainLander:
                     if self.tic > 15 and ctx.action_key_insert:
                         self.tic = 0
                         self.number_of_sucker += 1
-                        self.sucker[self.number_of_sucker - 1].location.x = self.xm
-                        self.sucker[self.number_of_sucker - 1].location.y = 240.0 - self.ym
+                        self.sucker[self.number_of_sucker - 1].spot.x = self.xm
+                        self.sucker[self.number_of_sucker - 1].spot.y = 240.0 - self.ym
                     #  REMOVE LAST ADDED ENERGY SUCKER
                     if self.tic > 15 and ctx.action_key_delete:
                         self.tic = 0
@@ -1281,71 +1280,70 @@ class CaptainLander:
                     if self.tic % 4 == 0:
                         self.ship.fuel -= 1
                 self.ship.speed.y -= self.scene.gravity
-                self.ship.location.x += self.ship.speed.x
-                self.ship.location.y += self.ship.speed.y
+                self.ship.spot.x += self.ship.speed.x
+                self.ship.spot.y += self.ship.speed.y
 
-                if self.ship.location.x < 0:
+                if self.ship.spot.x < 0:
                     if self.scene.go_left != 0:
                         if self.load_level(self.safe_land, self.sub_level_x - 1, self.sub_level_y) != 0:
                             self.sub_level_x -= 1
-                            self.ship.location.x = 320 - 5
+                            self.ship.spot.x = 320 - 5
                         else:
-                            self.ship.location.x = 0
+                            self.ship.spot.x = 0
                             self.ship.speed.x = -self.ship.speed.x / 2.0
                     else:
-                        self.ship.location.x = 0
+                        self.ship.spot.x = 0
                         self.ship.speed.x = -self.ship.speed.x / 2.0
-                if self.ship.location.x >= 319:
+                if self.ship.spot.x >= 319:
                     if self.scene.go_right != 0:
                         if self.load_level(self.safe_land, self.sub_level_x + 1, self.sub_level_y) != 0:
                             self.sub_level_x += 1
-                            self.ship.location.x = 5
+                            self.ship.spot.x = 5
                         else:
-                            self.ship.location.x = 319
+                            self.ship.spot.x = 319
                             self.ship.speed.x = -self.ship.speed.x / 2.0
                     else:
-                        self.ship.location.x = 319
+                        self.ship.spot.x = 319
                         self.ship.speed.x = -self.ship.speed.x / 2.0
-                if self.ship.location.y < 20:
+                if self.ship.spot.y < 20:
                     if self.scene.go_down != 0:
                         if self.load_level(self.safe_land, self.sub_level_x, self.sub_level_y - 1) != 0:
                             self.sub_level_y -= 1
-                            self.ship.location.y = 240 - 5
+                            self.ship.spot.y = 240 - 5
                         else:
-                            self.ship.location.y = 20
+                            self.ship.spot.y = 20
                             self.ship.speed.y = -self.ship.speed.y / 2.0
                     else:
-                        self.ship.location.y = 20
+                        self.ship.spot.y = 20
                         self.ship.speed.y = -self.ship.speed.y / 2.0
-                if self.ship.location.y > 240:
+                if self.ship.spot.y > 240:
                     if self.scene.go_up != 0:
                         if self.load_level(self.safe_land, self.sub_level_x, self.sub_level_y + 1) != 0:
                             self.sub_level_y += 1
-                            self.ship.location.y = 25
+                            self.ship.spot.y = 25
                         else:
-                            self.ship.location.y = 239
+                            self.ship.spot.y = 239
                             self.ship.speed.y = -self.ship.speed.y / 2.0
                     else:
-                        self.ship.location.y = 239
+                        self.ship.spot.y = 239
                         self.ship.speed.y = -self.ship.speed.y / 2.0
-                if self.ship.location.y <= self.scene.landscape[int(self.ship.location.x)].ground + \
+                if self.ship.spot.y <= self.scene.space[int(self.ship.spot.x)].ground + \
                         self.ship.size * 0.80 or \
-                        self.ship.location.y >= self.scene.landscape[int(self.ship.location.x)].sky - \
+                        self.ship.spot.y >= self.scene.space[int(self.ship.spot.x)].sky - \
                         self.ship.size * 0.80:
                     speed = int((self.ship.speed.x ** 2 + self.ship.speed.y ** 2) * 1000)
                     angle = int(abs(self.ship.angle / (np.pi / 180)))
-                    if (speed <= 60 and angle < 10 and
-                        self.ship.location.y <= self.scene.landscape[int(self.ship.location.x)].ground +
-                        self.ship.size * 0.80) and \
-                            ((self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10) or
-                             (self.scene.fuel_location.x - 10 <
-                              self.ship.location.x < self.scene.fuel_location.x + 10)):
-                        if self.scene.pad_location.x - 10 < self.ship.location.x < self.scene.pad_location.x + 10:
+                    if (speed <= 60
+                        and angle < 10
+                        and self.ship.spot.y <= self.scene.space[int(self.ship.spot.x)].ground + self.ship.size * 0.80
+                        ) and \
+                            ((self.scene.pad_spot.x - 10 < self.ship.spot.x < self.scene.pad_spot.x + 10)
+                             or (self.scene.fuel_spot.x - 10 < self.ship.spot.x < self.scene.fuel_spot.x + 10)):
+                        if self.scene.pad_spot.x - 10 < self.ship.spot.x < self.scene.pad_spot.x + 10:
                             self.safe_land += 1
                             self.score += int(self.ship.fuel)
                             self.ship.status = CaptainLander.LanderStatus.LS_LANDED
-                            if self.scene.landscape[int(self.ship.location.x)].sky <= 240 or \
-                                    self.scene.allow_take_off == 0:
+                            if self.scene.space[int(self.ship.spot.x)].sky <= 240 or self.scene.allow_take_off == 0:
                                 self.ship.status = CaptainLander.LanderStatus.LS_LANDED_NO_SKY
                             if self.safe_land >= 23:
                                 self.status = CaptainLander.GameStatus.GS_FINISH
@@ -1356,8 +1354,7 @@ class CaptainLander:
                         else:
                             if self.tic % 3 == 0 and self.ship.fuel < 100:
                                 self.ship.fuel += 1
-                            self.ship.location.y = self.scene.landscape[int(self.ship.location.x)].ground \
-                                                   + self.ship.size * 0.80
+                            self.ship.spot.y = self.scene.space[int(self.ship.spot.x)].ground + self.ship.size * 0.80
                     else:
                         self.status = CaptainLander.GameStatus.GS_CRASHED
                         self.ship.status = CaptainLander.LanderStatus.LS_CRASH
@@ -1412,7 +1409,7 @@ class CaptainLander:
             if vv != "version=1":
                 fi.close()
                 return 0
-            for land_slice in self.scene.landscape:
+            for land_slice in self.scene.space:
                 land_slice.sky = float(fi.readline())
                 land_slice.ground = float(fi.readline())
             self.scene.go_up = int(fi.readline())
@@ -1422,21 +1419,21 @@ class CaptainLander:
             self.scene.inverse = int(fi.readline())
             self.scene.allow_take_off = int(fi.readline())
             self.scene.landed_message = fi.readline().rstrip('\n')
-            #  get pad location
-            self.scene.pad_location.x = float(fi.readline())
-            self.scene.pad_location.y = float(fi.readline())
-            #  get fuel location
-            self.scene.fuel_location.x = float(fi.readline())
-            self.scene.fuel_location.y = float(fi.readline())
+            #  get pad spot
+            self.scene.pad_spot.x = float(fi.readline())
+            self.scene.pad_spot.y = float(fi.readline())
+            #  get fuel spot
+            self.scene.fuel_spot.x = float(fi.readline())
+            self.scene.fuel_spot.y = float(fi.readline())
             #  get gravity
             self.scene.gravity = float(fi.readline())
             if (sub_level_x <= -100 and sub_level_y <= -100) or self.status == CaptainLander.GameStatus.GS_EDIT or \
                     self.status == CaptainLander.GameStatus.GS_EDIT_TEXT:
-                #  get lander location
-                self.ship.location.x = float(fi.readline())
-                self.ship.location.y = float(fi.readline())
-                self.scene.start_location.x = self.ship.location.x
-                self.scene.start_location.y = self.ship.location.y
+                #  get lander spot
+                self.ship.spot.x = float(fi.readline())
+                self.ship.spot.y = float(fi.readline())
+                self.scene.start_spot.x = self.ship.spot.x
+                self.scene.start_spot.y = self.ship.spot.y
                 #  get lander speed
                 self.ship.speed.x = float(fi.readline())
                 self.ship.speed.y = float(fi.readline())
@@ -1451,9 +1448,9 @@ class CaptainLander:
             #  get enemies quantity of "Energy sucker"
             self.number_of_sucker = int(fi.readline())
             for i in range(self.number_of_sucker):
-                #  get enemy location
-                self.sucker[i].location.x = float(fi.readline())
-                self.sucker[i].location.y = float(fi.readline())
+                #  get enemy spot
+                self.sucker[i].spot.x = float(fi.readline())
+                self.sucker[i].spot.y = float(fi.readline())
             # get message of level
             if 0 <= lvl < self.level_title.__len__():
                 self.level_title[lvl] = fi.readline().rstrip('\n')
@@ -1473,7 +1470,7 @@ class CaptainLander:
                 os.rename(level_file_name, old_file_name)
             fi = open(level_file_name, "wt")
             print("version=1", file=fi)
-            for land_slice in self.scene.landscape:
+            for land_slice in self.scene.space:
                 print(land_slice.sky, file=fi)
                 print(land_slice.ground, file=fi)
             print(self.scene.go_up, file=fi)
@@ -1483,17 +1480,17 @@ class CaptainLander:
             print(self.scene.inverse, file=fi)
             print(self.scene.allow_take_off, file=fi)
             print(self.scene.landed_message, file=fi)
-            #  put pad location
-            print(self.scene.pad_location.x, file=fi)
-            print(self.scene.pad_location.y, file=fi)
-            #  put fuel location
-            print(self.scene.fuel_location.x, file=fi)
-            print(self.scene.fuel_location.y, file=fi)
+            #  put pad spot
+            print(self.scene.pad_spot.x, file=fi)
+            print(self.scene.pad_spot.y, file=fi)
+            #  put fuel spot
+            print(self.scene.fuel_spot.x, file=fi)
+            print(self.scene.fuel_spot.y, file=fi)
             # put gravity
             print(self.scene.gravity, file=fi)
-            #  put lander location
-            print(int(self.ship.location.x * 1000.0) / 1000.0, file=fi)
-            print(int(self.ship.location.y * 1000.0) / 1000.0, file=fi)
+            #  put lander spot
+            print(int(self.ship.spot.x * 1000.0) / 1000.0, file=fi)
+            print(int(self.ship.spot.y * 1000.0) / 1000.0, file=fi)
             #  put lander speed
             print(int(self.ship.speed.x * 100000.0) / 100000.0, file=fi)
             print(int(self.ship.speed.y * 100000.0) / 100000.0, file=fi)
@@ -1504,8 +1501,8 @@ class CaptainLander:
             #  put enemies quantity of "Energy sucker"
             print(self.number_of_sucker, file=fi)
             for i in range(self.number_of_sucker):
-                print(self.sucker[i].location.x, file=fi)
-                print(self.sucker[i].location.y, file=fi)
+                print(self.sucker[i].spot.x, file=fi)
+                print(self.sucker[i].spot.y, file=fi)
             # put message of level
             if 0 <= lvl < self.level_title.__len__():
                 print(self.level_title[lvl], file=fi)
@@ -1996,3 +1993,5 @@ if __name__ == '__main__':
     print("Get ready")
     CaptainLander().play()
     print("Bye bye")
+else:
+    print("Captain Lander loaded.")
