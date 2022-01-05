@@ -206,42 +206,44 @@ class RedcrabLander:
                             else:  # square_root_of_2 power n (2 to 9)
                                 k = 0.70710678118654752440084436210485 ** (a - 48)
 
-        def draw_text(self, ctx, s, xc, yc, colour, text_angle=None):
+        def draw_text(self, ctx, text_content, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
-            c = s.__len__() * self.cx
+            c = text_content.__len__() * self.cx
             dx = self.size * math.cos(text_angle) * 1.80
             dy = self.size * math.sin(text_angle) * 1.80
-            j = 0
-            for letter in s:
-                self.draw_script(ctx, self.alphabet[ord(letter)].glyph,
-                                 (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
-                j += 1
+            current_x = -c * dx + xc
+            current_y = -c * dy + yc
+            for letter in text_content:
+                self.draw_script(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
+                current_x += dx
+                current_y += dy
 
-        def draw_text_rich(self, ctx, s, xc, yc, colour, text_angle=None):
+        def draw_text_rich(self, ctx, text_content, xc, yc, colour, text_angle=None):
             text_angle = self.angle if (text_angle is None) else text_angle
-            c, _ = self.draw_text_length(s)
+            c, _ = self.draw_text_length(text_content)
             c = float(c * self.cx)
             default_colour = colour
             dx = self.size * math.cos(text_angle) * 1.80
             dy = self.size * math.sin(text_angle) * 1.80
-            j = 0
+            current_x = -c * dx + xc
+            current_y = -c * dy + yc
             read_colour = False
-            for letter in s:
+            for letter in text_content:
                 if letter == "@":
                     read_colour = True
                 elif read_colour:
-                    a = ord(letter)
-                    if 48 <= a <= 57:
-                        colour = a - 48
-                    elif 65 <= a <= 70:
-                        colour = a - 55
+                    colour = ord(letter)
+                    if 48 <= colour <= 57:
+                        colour = colour - 48
+                    elif 65 <= colour <= 70:
+                        colour = colour - 55
                     else:
                         colour = default_colour
                     read_colour = False
                 else:
-                    a = ord(letter)
-                    self.draw_script(ctx, self.alphabet[a].glyph, (xc + dx * (j - c)), (yc + dy * (j - c)), colour)
-                    j += 1
+                    self.draw_script(ctx, self.alphabet[ord(letter)].glyph, current_x, current_y, colour)
+                    current_x += dx
+                    current_y += dy
 
         def draw_text_length(self, s):
             number_character = 0
