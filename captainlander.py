@@ -1841,7 +1841,7 @@ class CaptainLander:
             self.vectrex_memory_size = 0
 
         def is_any_key_pressed(self):  # return True or False
-            return self.action_key_any
+            return self.action_key_any or self.action_touch_any
 
         def capture_input(self):
             self.key_text = ""
