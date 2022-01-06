@@ -1972,7 +1972,7 @@ class CaptainLander:
         self.run = False
         self.game = None
         self.game_context = None
-        print("Captain Lander ready")
+        print("Captain Lander loaded")
 
     def play(self):
         print("Captain Lander running")
@@ -1996,4 +1996,4 @@ if __name__ == '__main__':
     CaptainLander().play()
     print("Bye bye")
 else:
-    print("Captain Lander loaded.")
+    print("Captain Lander ready.")
