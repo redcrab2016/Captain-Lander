@@ -10,9 +10,9 @@ and explained in Freebasic forum at https://www.freebasic.net/forum/viewtopic.ph
 
 It has already be ported in Unity see http://roki.zone/unity and a variant http://roki.zone/DAPI  
 
-you may run directly lander.py in its working directory due to asset dependencies in relative ./asset and ./data folders
+you may run directly captainlander.py by executing
 
-**>python lander.py** 
+**>python captainlander.py** 
 ## Music 
 Andrea Baroni "Of Gods and Philosophers", see asset/readme.txt file
 

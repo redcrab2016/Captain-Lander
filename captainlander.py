@@ -1707,7 +1707,7 @@ class CaptainLander:
             self.G_HEIGHT = 768
             pg.init()
             self.clock = pg.time.Clock()
-            self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT))
+            self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT), pg.SCALED | pg.FULLSCREEN )
             pg.display.set_caption('Captain Lander')
             pg.display.set_icon(pg.image.load(CaptainLander.data_asset_path + "icon.png"))
             self.number_segment_circle = 16
@@ -1744,6 +1744,9 @@ class CaptainLander:
             self.vectrex_text_2.scale_rotation(4 * self.KW, 0)
             self.vectrex_board_text.scale_rotation(3.5 * self.KW, 0)
             self.vectrex_board_text.set_center_text(0)
+
+        def __del__(self):
+            pg.quit()
 
         def sound_pause(self):
             if self.music_channel is not None:
@@ -1922,6 +1925,17 @@ class CaptainLander:
                             self.action_mouse_button2 or \
                             self.action_mouse_button3
                     elif self.last_event.type == MOUSEBUTTONDOWN:
+                        if self.last_event.touch:
+                            if self.last_event.pos[0] < self.G_WIDTH / 3 \
+                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_rotate_left = True
+                            elif self.last_event.pos[0] > 2 * self.G_WIDTH / 3 \
+                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_rotate_right = True
+                            elif self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_thrust = True
+                            else:
+                                self.action_pause_resume = True
                         self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = True
@@ -1930,6 +1944,17 @@ class CaptainLander:
                         elif self.last_event.button == 3:
                             self.action_mouse_button3 = True
                     elif self.last_event.type == MOUSEBUTTONUP:
+                        if self.last_event.touch:
+                            if self.last_event.pos[0] < self.G_WIDTH / 3 \
+                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_rotate_left = False
+                            elif self.last_event.pos[0] > 2 * self.G_WIDTH / 3 \
+                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_rotate_right = False
+                            elif self.last_event.pos[1] > self.G_HEIGHT / 2:
+                                self.action_thrust = False
+                            else:
+                                self.action_pause_resume = False
                         self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = False
@@ -1964,15 +1989,14 @@ class CaptainLander:
             self.frames += 1
             self.clock.tick(int(self.fps))
 
-    data_path = "data/"
-    data_asset_path = "asset/"
+    data_path = os.path.dirname(__file__) + "/data/"
+    data_asset_path = os.path.dirname(__file__) + "/asset/"
     data_archive = data_asset_path + "lander.lvl"
 
     def __init__(self):
         self.run = False
         self.game = None
         self.game_context = None
-        print("Captain Lander loaded")
 
     def play(self):
         print("Captain Lander running")
@@ -1988,11 +2012,12 @@ class CaptainLander:
             else:
                 self.run = self.game.tick(self.game_context)
             self.game_context.render_all_drawing()
-        pg.quit()
+        print("Thanks for playing")
 
 
 if __name__ == '__main__':
     print("Get ready")
+    print()
     CaptainLander().play()
     print("Bye bye")
 else:
