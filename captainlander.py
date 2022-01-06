@@ -1910,16 +1910,15 @@ class CaptainLander:
                     if self.last_event.type == KEYDOWN:
                         self.key_text = self.last_event.unicode
                 elif self.last_event.type == FINGERDOWN or self.last_event.type == FINGERUP:
-                    if self.last_event.touch:
-                        if self.last_event.y > 0.5:  # lower half
-                            if self.last_event.x < 0.333:  # lower half and left third part
-                                self.action_rotate_left = self.last_event.type == FINGERDOWN
-                            elif self.last_event.x > 0.666: # lower half and right third part
-                                self.action_rotate_right = self.last_event.type == FINGERDOWN
-                            else:  # lower half and middle third part
-                                self.action_thrust = self.last_event.type == FINGERDOWN
-                        else:  # upper half part
-                            self.action_pause_resume = self.last_event.type == FINGERDOWN
+                    if self.last_event.y > 0.5:  # lower half
+                        if self.last_event.x < 0.333:  # lower half and left third part
+                            self.action_rotate_left = self.last_event.type == FINGERDOWN
+                        elif self.last_event.x > 0.666: # lower half and right third part
+                            self.action_rotate_right = self.last_event.type == FINGERDOWN
+                        else:  # lower half and middle third part
+                            self.action_thrust = self.last_event.type == FINGERDOWN
+                    else:  # upper half part
+                        self.action_pause_resume = self.last_event.type == FINGERDOWN
                 elif self.last_event.type == MOUSEMOTION or \
                         self.last_event.type == MOUSEBUTTONUP or \
                         self.last_event.type == MOUSEBUTTONDOWN:
