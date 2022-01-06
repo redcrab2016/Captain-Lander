@@ -1909,6 +1909,17 @@ class CaptainLander:
 
                     if self.last_event.type == KEYDOWN:
                         self.key_text = self.last_event.unicode
+                elif self.last_event.type == FINGERDOWN or self.last_event.type == FINGERUP:
+                    if self.last_event.touch:
+                        if self.last_event.y > 0.5:  # lower half
+                            if self.last_event.x < 0.333:  # lower half and left third part
+                                self.action_rotate_left = self.last_event.type == FINGERDOWN
+                            elif self.last_event.x > 0.666: # lower half and right third part
+                                self.action_rotate_right = self.last_event.type == FINGERDOWN
+                            else:  # lower half and middle third part
+                                self.action_thrust = self.last_event.type == FINGERDOWN
+                        else:  # upper half part
+                            self.action_pause_resume = self.last_event.type == FINGERDOWN
                 elif self.last_event.type == MOUSEMOTION or \
                         self.last_event.type == MOUSEBUTTONUP or \
                         self.last_event.type == MOUSEBUTTONDOWN:
@@ -1925,17 +1936,6 @@ class CaptainLander:
                             self.action_mouse_button2 or \
                             self.action_mouse_button3
                     elif self.last_event.type == MOUSEBUTTONDOWN:
-                        if self.last_event.touch:
-                            if self.last_event.pos[0] < self.G_WIDTH / 3 \
-                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_rotate_left = True
-                            elif self.last_event.pos[0] > 2 * self.G_WIDTH / 3 \
-                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_rotate_right = True
-                            elif self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_thrust = True
-                            else:
-                                self.action_pause_resume = True
                         self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = True
@@ -1944,17 +1944,6 @@ class CaptainLander:
                         elif self.last_event.button == 3:
                             self.action_mouse_button3 = True
                     elif self.last_event.type == MOUSEBUTTONUP:
-                        if self.last_event.touch:
-                            if self.last_event.pos[0] < self.G_WIDTH / 3 \
-                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_rotate_left = False
-                            elif self.last_event.pos[0] > 2 * self.G_WIDTH / 3 \
-                                    and self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_rotate_right = False
-                            elif self.last_event.pos[1] > self.G_HEIGHT / 2:
-                                self.action_thrust = False
-                            else:
-                                self.action_pause_resume = False
                         self.action_mouse_drag = False
                         if self.last_event.button == 1:
                             self.action_mouse_button1 = False
