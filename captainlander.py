@@ -1696,6 +1696,7 @@ class CaptainLander:
             self.action_key_left_ctrl = False
             self.action_edit = False
             self.action_key_any = False
+            self.action_touch_any = False
             self.last_event = None
             self.action_pause_resume = False
             self.action_thrust = False
@@ -1919,6 +1920,7 @@ class CaptainLander:
                             self.action_thrust = self.last_event.type == FINGERDOWN
                     else:  # upper half part
                         self.action_pause_resume = self.last_event.type == FINGERDOWN
+                    self.action_touch_any = self.last_event.type == FINGERDOWN
                 elif self.last_event.type == MOUSEMOTION or \
                         self.last_event.type == MOUSEBUTTONUP or \
                         self.last_event.type == MOUSEBUTTONDOWN:
