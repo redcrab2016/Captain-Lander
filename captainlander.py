@@ -26,26 +26,26 @@ class CaptainLander:
     class TinyVectrex:
         class TV_Polar2D:
             def __init__(self):
-                self.radius = 0.0
-                self.angle = 0.0
+                self.radius: float = 0.0
+                self.angle: float = 0.0
 
         class TV_vertex2D:
             def __init__(self):
-                self.x = 0.0
-                self.y = 0.0
+                self.x: float = 0.0
+                self.y: float = 0.0
 
         class TV_Glyph:
             def __init__(self):
-                self.glyph = ""
+                self.glyph: str = ""
 
         def __init__(self):
             self.plot = tuple(CaptainLander.TinyVectrex.TV_Polar2D() for _ in range(18))
             self.plotxy = tuple(CaptainLander.TinyVectrex.TV_vertex2D() for _ in range(18))
-            self.size = 0.0
-            self.angle = 0.0
-            self.cx = 0
+            self.size: float = 0.0
+            self.angle: float = 0.0
+            self.cx: float = 0
             self.alphabet = tuple(CaptainLander.TinyVectrex.TV_Glyph() for _ in range(356))
-            self.boom = 1.0
+            self.boom: float = 1.0
             self.__grid_factor = (((2 ** .5) / 2) ** 0,
                                   ((2 ** .5) / 2) ** 1,
                                   ((2 ** .5) / 2) ** 2,
@@ -152,17 +152,17 @@ class CaptainLander:
             self.alphabet[ord("y")].glyph = "1GAI AL"
             self.alphabet[ord("z")].glyph = "1GIEC"
 
-        def set_center_text(self, center):
+        def set_center_text(self, center: float):
             self.cx = center
 
-        def scale_rotation(self, scale, rotation):
+        def scale_rotation(self, scale: float, rotation: float):
             for i in range(18):
                 self.plotxy[i].x = scale * math.cos(rotation + self.plot[i].angle) * self.plot[i].radius
                 self.plotxy[i].y = scale * math.sin(rotation + self.plot[i].angle) * self.plot[i].radius
             self.size = scale
             self.angle = rotation
 
-        def draw_glyph(self, ctx, glyph_design, xc, yc, colour, explode=None):
+        def draw_glyph(self, ctx, glyph_design: str, xc: float, yc: float, colour: int, explode: float = None):
             if glyph_design is None:
                 return
             explode = self.boom if explode is None else explode
@@ -214,7 +214,7 @@ class CaptainLander:
                         if 48 <= a <= 57:  # from 0 to 9
                             k = self.__grid_factor[a - 48]
 
-        def draw_text(self, ctx, text_content, xc, yc, colour, text_angle=None):
+        def draw_text(self, ctx, text_content: str, xc: float, yc: float, colour: int, text_angle: float = None):
             text_angle = self.angle if (text_angle is None) else text_angle
             c = text_content.__len__() * self.cx
             dx = self.size * math.cos(text_angle) * 1.80
@@ -226,7 +226,7 @@ class CaptainLander:
                 current_x += dx
                 current_y += dy
 
-        def draw_rich_text(self, ctx, text_content, xc, yc, colour, text_angle=None):
+        def draw_rich_text(self, ctx, text_content: str, xc: float, yc: float, colour: int, text_angle: float = None):
             text_angle = self.angle if (text_angle is None) else text_angle
             c, _ = self.draw_text_length(text_content)
             c = float(c * self.cx)
@@ -253,7 +253,7 @@ class CaptainLander:
                     current_x += dx
                     current_y += dy
 
-        def draw_text_length(self, s):
+        def draw_text_length(self, s: str):
             number_character = 0
             if s is None:
                 return 0, 0
@@ -298,8 +298,8 @@ class CaptainLander:
 
     class Vertex2D:
         def __init__(self):
-            self.x = 0.0
-            self.y = 0.0
+            self.x: float = 0.0
+            self.y: float = 0.0
 
     class Lander:
         def __init__(self, x=0, y=0):
@@ -465,7 +465,7 @@ class CaptainLander:
                                              ((self.fuel_spot.x + 1) * ctx.KW),
                                              ((240 - self.fuel_spot.y + 8) * ctx.KH), 11)
 
-        def init(self, global_level=0):
+        def init(self, global_level: int = 0):
             self.tic = 0
             self.gravity = 0.0025 * (int(global_level / 10.0) / 3.0 + 1.0)
             self.inverse = 0
@@ -812,7 +812,7 @@ class CaptainLander:
                     ctx.vectrex_text_1.draw_text(ctx, pst, ctx.G_WIDTH / 2.0, 120.0 * ctx.KH, 10)
                 ctx.vectrex_board_text.draw_text(ctx, "X", self.xm * ctx.KW, self.ym * ctx.KH, 10)
 
-        def init_level(self, level):
+        def init_level(self, level: int):
             self.player_action = CaptainLander.PlayerAction.PA_NOTHING
             self.ship.init()
             self.number_of_sucker = 0
@@ -888,12 +888,12 @@ class CaptainLander:
             st = ctx.key_text  # (ctx.anyKey()) ? "+" : "";
             #  Player action
             self.player_action = CaptainLander.PlayerAction.PA_NOTHING
+            if ctx.action_thrust:
+                self.player_action = CaptainLander.PlayerAction.PA_THRUST
             if ctx.action_rotate_left:
                 self.player_action = CaptainLander.PlayerAction.PA_LEFT
             if ctx.action_rotate_right:
                 self.player_action = CaptainLander.PlayerAction.PA_RIGHT
-            if ctx.action_thrust:
-                self.player_action = CaptainLander.PlayerAction.PA_THRUST
             if ctx.action_pause_resume:
                 self.player_action = CaptainLander.PlayerAction.PA_PAUSE
             if ctx.action_quit:
@@ -1261,7 +1261,7 @@ class CaptainLander:
                     self.player_action = CaptainLander.PlayerAction.PA_NOTHING
                     ctx.sound_pause()
                     self.tic = 0
-                if self.player_action == CaptainLander.PlayerAction.PA_THRUST:
+                if self.player_action == CaptainLander.PlayerAction.PA_THRUST or ctx.action_thrust:
                     self.ship.status = CaptainLander.LanderStatus.LS_THRUST
                 else:
                     if self.ship.status != CaptainLander.LanderStatus.LS_CRASH:
@@ -1274,7 +1274,7 @@ class CaptainLander:
                     self.ship.angle -= 2 * np.pi
                 if self.ship.angle < -np.pi:
                     self.ship.angle += 2 * np.pi
-                if self.player_action == CaptainLander.PlayerAction.PA_THRUST and self.ship.fuel > 0:
+                if (self.player_action == CaptainLander.PlayerAction.PA_THRUST or ctx.action_thrust) and self.ship.fuel > 0:
                     self.ship.speed.x += math.sin(self.ship.angle) * 0.03
                     self.ship.speed.y += math.cos(self.ship.angle) * 0.03
                     if self.tic % 4 == 0:
@@ -1388,11 +1388,11 @@ class CaptainLander:
                 return False
             return True
 
-        def load_level(self, lvl, sub_level_x=-100, sub_level_y=-100):
+        def load_level(self, level: int, sub_level_x: int = -100, sub_level_y: int = -100):
             vv = "." + str(sub_level_x) + "." + str(sub_level_y)
             if sub_level_x <= -100 and sub_level_y <= -100:
                 vv = ".0.0"
-            level_name = "l" + str(lvl) + vv + ".lvl"
+            level_name = "l" + str(level) + vv + ".lvl"
             levelFilename = CaptainLander.data_path + level_name
             if os.path.exists(levelFilename):
                 fi = open(levelFilename)
@@ -1452,17 +1452,17 @@ class CaptainLander:
                 self.sucker[i].spot.x = float(fi.readline())
                 self.sucker[i].spot.y = float(fi.readline())
             # get message of level
-            if 0 <= lvl < self.level_title.__len__():
-                self.level_title[lvl] = fi.readline().rstrip('\n')
+            if 0 <= level < self.level_title.__len__():
+                self.level_title[level] = fi.readline().rstrip('\n')
             fi.close()
             return 1
 
-        def save_level(self, lvl, sub_level_x=-100, sub_level_y=-100):
+        def save_level(self, level: int, sub_level_x: int = -100, sub_level_y: int = -100):
             if sub_level_x <= -100 and sub_level_y <= -100:
                 vv = ".0.0"
             else:
                 vv = "." + str(sub_level_x) + "." + str(sub_level_y)
-            level_file_name = CaptainLander.data_path + "l" + str(lvl) + vv + ".lvl"
+            level_file_name = CaptainLander.data_path + "l" + str(level) + vv + ".lvl"
             if os.path.exists(level_file_name):
                 old_file_name = level_file_name + ".backup-" + datetime.now().strftime("%Y%m%d%H%M%S")
                 if os.path.exists(old_file_name):
@@ -1504,10 +1504,10 @@ class CaptainLander:
                 print(self.sucker[i].spot.x, file=fi)
                 print(self.sucker[i].spot.y, file=fi)
             # put message of level
-            if 0 <= lvl < self.level_title.__len__():
-                print(self.level_title[lvl], file=fi)
+            if 0 <= level < self.level_title.__len__():
+                print(self.level_title[level], file=fi)
             else:
-                print("Msg" + str(lvl), file=fi)
+                print("Msg" + str(level), file=fi)
             fi.close()
             print("Level file", level_file_name, "saved.")
             return 1
@@ -1697,6 +1697,7 @@ class CaptainLander:
             self.action_edit = False
             self.action_key_any = False
             self.action_touch_any = False
+            self.action_joy_any = False
             self.last_event = None
             self.action_pause_resume = False
             self.action_thrust = False
@@ -1706,9 +1707,10 @@ class CaptainLander:
             self.fps = 50.0
             self.G_WIDTH = 1024
             self.G_HEIGHT = 768
+            self.joystick = {}
             pg.init()
             self.clock = pg.time.Clock()
-            self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT), pg.SCALED | pg.FULLSCREEN )
+            self.screen = pg.display.set_mode((self.G_WIDTH, self.G_HEIGHT), pg.SCALED | pg.FULLSCREEN)
             pg.display.set_caption('Captain Lander')
             pg.display.set_icon(pg.image.load(CaptainLander.data_asset_path + "icon.png"))
             self.number_segment_circle = 16
@@ -1794,7 +1796,7 @@ class CaptainLander:
             self.sound[8].set_volume(0.2)
             self.sound[8].play()
 
-        def draw_line(self, x1, y1, x2, y2, colour):
+        def draw_line(self, x1, y1, x2, y2, colour: int):
             if self.vectrex_memory_size >= self.vectrex_memory.__len__():
                 print("Out of Vertex memory (max " + str(self.vectrex_memory_size) + ")")
                 return
@@ -1809,7 +1811,7 @@ class CaptainLander:
             self.vectrex_memory[self.vectrex_memory_size].colour = self.palette[colour]
             self.vectrex_memory_size += 1
 
-        def draw_box_full(self, x1, y1, x2, y2, colour):
+        def draw_box_full(self, x1, y1, x2, y2, colour: int):
             self.draw_box(x1, y1, x2, y2, colour)
             xx1 = x1 if (x1 < x2) else x2
             xx2 = x2 if (x1 < x2) else x1
@@ -1826,7 +1828,7 @@ class CaptainLander:
             self.draw_line(x1, y1, x1, y2, colour)
             self.draw_line(x2, y1, x2, y2, colour)
 
-        def draw_circle(self, x, y, radius, colour):
+        def draw_circle(self, x, y, radius, colour: int):
             deltaAngle = np.pi * 2 / self.number_segment_circle
             for i in range(self.number_segment_circle):
                 angle1 = deltaAngle * i
@@ -1841,10 +1843,11 @@ class CaptainLander:
             self.vectrex_memory_size = 0
 
         def is_any_key_pressed(self):  # return True or False
-            return self.action_key_any or self.action_touch_any
+            return self.action_key_any or self.action_touch_any or self.action_joy_any
 
         def capture_input(self):
             self.key_text = ""
+            self.action_joy_any = False
             self.action_quit = False
             self.last_event = None
             for self.last_event in pg.event.get():
@@ -1914,7 +1917,7 @@ class CaptainLander:
                     if self.last_event.y > 0.5:  # lower half
                         if self.last_event.x < 0.333:  # lower half and left third part
                             self.action_rotate_left = self.last_event.type == FINGERDOWN
-                        elif self.last_event.x > 0.666: # lower half and right third part
+                        elif self.last_event.x > 0.666:  # lower half and right third part
                             self.action_rotate_right = self.last_event.type == FINGERDOWN
                         else:  # lower half and middle third part
                             self.action_thrust = self.last_event.type == FINGERDOWN
@@ -1952,6 +1955,37 @@ class CaptainLander:
                             self.action_mouse_button2 = False
                         elif self.last_event.button == 3:
                             self.action_mouse_button3 = False
+                elif self.last_event.type == JOYAXISMOTION:
+                    if self.last_event.axis % 2 == 0:  # even index axis should be horizontal axis (rule of thumb)
+                        if self.last_event.value <= -0.25:
+                            self.action_rotate_left = True
+                        else:
+                            self.action_rotate_left = False
+                        if self.last_event.value >= 0.25:
+                            self.action_rotate_right = True
+                        else:
+                            self.action_rotate_right = False
+                elif self.last_event.type == JOYHATMOTION:
+                    if self.last_event.value[0] == -1:
+                        self.action_rotate_left = True
+                    else:
+                        self.action_rotate_left = False
+                    if self.last_event.value[0] == 1:
+                        self.action_rotate_right = True
+                    else:
+                        self.action_rotate_right = False
+                elif self.last_event.type == JOYBUTTONDOWN:
+                    self.action_joy_any = False
+                    self.action_thrust = True
+                elif self.last_event.type == JOYBUTTONUP:
+                    self.action_joy_any = True
+                    self.action_thrust = False
+                elif self.last_event.type == JOYDEVICEADDED:
+                    self.joystick[self.last_event.device_index] = pg.joystick.Joystick(self.last_event.device_index)
+                    self.joystick[self.last_event.device_index].init()
+                elif self.last_event.type == JOYDEVICEREMOVED:
+                    self.joystick[self.last_event.device_index].quit()
+                    self.joystick[self.last_event.device_index] = None
 
         def render_all_drawing(self):
             if self.slow_host:
