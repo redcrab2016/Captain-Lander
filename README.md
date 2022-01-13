@@ -29,7 +29,7 @@ This game do use only "line drawing" for everything (  text, landscape and objec
  - **Up arrow** : Thrust
  - **Space** : pause / resume game
 
-### Jpystick
+### Joystick
 
  - Analog stick left/right : rotate left and right
  - Hat stick left/right : rotate left and right
