@@ -29,13 +29,20 @@ This game do use only "line drawing" for everything (  text, landscape and objec
  - **Up arrow** : Thrust
  - **Space** : pause / resume game
 
+### Jpystick
+
+ - Analog stick left/right : rotate left and right
+ - Hat stick left/right : rotate left and right
+ - Any button : thrust
+
+
 ### Touch screen
 
- - Top half screen : pause / resume game
+ - **Top half screen** : pause / resume game
  - Bottom half screen :
-	 - Left area : rotate lander counter clockwise
-	 - Right area : rotate lander clockwise
-	 - Middle area : thrust
+	 - **Left area** : rotate lander counter clockwise
+	 - **Right area** : rotate lander clockwise
+	 - **Middle area** : thrust
 
 ## Music 
 Andrea Baroni "Of Gods and Philosophers", see asset/readme.txt file  
